@@ -1,9 +1,9 @@
-// import UIHandler from "./UIHandler"
+import UIHandler from "./UIHandler"
 // import CardHandler from "./CardHandler"
 
 export default class InteractivityHandler {
     constructor(scene) {
-
+        this.UIHandler = new UIHandler(scene)
         // scene.ready.on('pointerdown', () => {
         //     scene.socket.emit('ready', scene.socket.id)
         //     scene.ready.disableInteractive()
@@ -179,26 +179,15 @@ export default class InteractivityHandler {
             scene.fadeBackground.setVisible(false)
             // gameObject.setTint(0xff69b4)
             scene.children.bringToTop(gameObject)
-            
-            // this.highlightArray = []
-            // if (gameObject.getData('owner') === scene.GameHandler.player) {
-            //     for (const lane in scene.board) {
-            //         for (const zone in scene.board[lane]) {
-            //             if (scene.board[lane][zone].getData('playerSummonable') && !scene.board[lane][zone].getData('card')) {
-            //                 this.highlightArray.push(this.UIHandler.ZoneHandler.renderOutline(scene.board[lane][zone], 0x00ffff))
-            //             }
-            //         }
-            //     }
-            // }
+            if (scene.GameHandler.currentTurn === scene.socket.id && scene.GameHandler.gameState === 'ready') {
+                this.highlight = this.UIHandler.zoneHandler.renderOutline(scene.playerHeroArea, 0x00ffff)
+            }
         })
 
         scene.input.on('dragend', (pointer, gameObject, dropped) => {
-            // gameObject.setTint()
-            // this.highlightArray.forEach(highlight => {
-            //     highlight.clear()
-            // })
-            // scene.fadeBackground.setVisible(false)
-
+            if (scene.GameHandler.currentTurn === scene.socket.id && scene.GameHandler.gameState === 'ready') {
+                this.highlight.clear()
+            }
             if (!dropped) {
                 gameObject.x = gameObject.input.dragStartX
                 gameObject.y = gameObject.input.dragStartY
@@ -207,12 +196,11 @@ export default class InteractivityHandler {
 
         
         scene.input.on('drop', (pointer, gameObject, dropZone) => {
-            // console.log(dropZone.getData('playerSummonable'))
-
-            if (scene.GameHandler.isMyTurn && scene.GameHandler.gameState === 'ready') { //&& dropZone.getData('playerSummonable') && !dropZone.getData('card')
-                gameObject.x = dropZone.x
-                gameObject.y = dropZone.y
-                
+            if (scene.GameHandler.currentTurn === scene.socket.id && scene.GameHandler.gameState === 'ready') {
+                // gameObject.x = dropZone.x
+                // gameObject.y = dropZone.y
+                scene.CardHandler.moveToHeroArea(gameObject)
+                dropZone.data.list.heroes.push(gameObject)
                 // let tween = scene.tweens.add({
                 //     targets: gameObject,
                 //     scaleX: 0,
@@ -227,7 +215,7 @@ export default class InteractivityHandler {
                 // })
 
                 scene.input.setDraggable(gameObject, false)
-                scene.socket.emit('cardPlayed', gameObject.data.values.name, scene.socket.id)
+                scene.socket.emit('heroPlayed', gameObject.data.values.name, scene.socket.id)
                 // console.log(dropZone)
 
                 

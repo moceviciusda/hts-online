@@ -2,6 +2,7 @@
 // import FakeCrystal from "./cards/FakeCrystal";
 
 import CardBack from "./cards/CardBack"
+import MonsterCardBack from "./cards/monsters/MonsterCardBack"
 
 import TheCharismaticSong from "./cards/party_leaders/TheCharismaticSong"
 import TheCloakedSage from "./cards/party_leaders/TheCloakedSage"
@@ -49,6 +50,7 @@ export default class DeckHandler {
         this.dealCard = (x, y, name, owner) => {
             let cards = {
                 cardBack: new CardBack(scene),
+                monsterCardBack: new MonsterCardBack(scene),
 
                 theCharismaticSong: new TheCharismaticSong(scene),
                 theCloakedSage: new TheCloakedSage(scene),
@@ -111,9 +113,15 @@ export default class DeckHandler {
         
         this.drawCard = (name, owner) => {
             let card = scene.DeckHandler.dealCard(scene.deckArea.x, scene.deckArea.y, name, owner).setData('location', 'hand')
+            scene.UIHandler.areas[owner].handArea.cards.push(card)
             scene.CardHandler.moveToHand(card, owner)
         }
-        // this.drawCards = (deckOwner, handOwner, amount) => {
+
+        this.dealMonster = name => {
+            let monster = scene.DeckHandler.dealCard(scene.monsterArea.x+344-85, scene.monsterArea.y, name, null)
+            scene.CardHandler.moveToMonsterArea(monster)
+            scene.GameHandler.monsters.push(monster)
+        }        // this.drawCards = (deckOwner, handOwner, amount) => {
         //     for (let i = 0; i < amount; i++) {
         //         if (deckOwner.deck.length > 0) {
         //             let card = deckOwner.deck.pop()

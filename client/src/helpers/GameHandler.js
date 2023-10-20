@@ -2,8 +2,9 @@ import { Socket } from "socket.io-client"
 
 export default class GameHandler {
     constructor(scene) {
-        this.partyLeaders = []
         this.gameState = 'initializing'
+        this.partyLeaders = []
+        this.monsters = []
         this.deck = []
         this.players = {
         }

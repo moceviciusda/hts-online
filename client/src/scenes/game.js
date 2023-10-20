@@ -15,7 +15,6 @@ export default class Game extends Phaser.Scene {
     }
 
     preload() {
-
         this.load.image('htsCardBack', 'src/assets/cardbacks/HtS_CardBack_Scaled.png')
         this.load.image('htsMonsterBack', 'src/assets/cardbacks/HtS_MonsterBack_Scaled.png')
 

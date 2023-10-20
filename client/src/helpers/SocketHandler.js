@@ -16,6 +16,7 @@ export default class SocketHandler {
 
         scene.socket.on('setGameState', gameState => {
             scene.GameHandler.setGameState(gameState)
+
             if (gameState === 'partyLeaderSelection') {
                 for (let player in scene.GameHandler.players) {
                     if (player !== scene.socket.id) {
@@ -23,38 +24,45 @@ export default class SocketHandler {
                     }
                 }
             }
+
             if (gameState === 'dealingHands') {
                 scene.leaderSelectionText.destroy()
                 scene.confirmLeader.destroy()
+                scene.fadeBackground.setVisible(false)
                 scene.GameHandler.partyLeaders.forEach(leader => {
                     leader.postFX.clear()
                     leader.setTint()
                     for (let player in scene.GameHandler.players) {
                         if (leader.getData('name') === scene.GameHandler.players[player].partyLeader) {
                             leader.setData('owner', player)
-                            scene.CardHandler.moveToLeaderArea(leader)
+                            scene.CardHandler.moveToLeaderArea(leader).then(() => {
+                                if (leader.getData('owner') === scene.GameHandler.currentTurn) {
+                                    scene.socket.emit('leadersMoved')
+                                }
+                            })
                         }
-                        
                     }
+
                     if (!leader.getData('owner')) {
                         leader.destroy()
                     }
                 });
-            }
-            if (gameState === 'ready') {
                 scene.DeckHandler.dealCard(scene.deckArea.x, scene.deckArea.y, 'cardBack', null).setAngle(-90)
+                scene.DeckHandler.dealCard(scene.monsterArea.x+344-85, scene.monsterArea.y, 'monsterCardBack', null)
+            }
+
+            if (gameState === 'ready') {
+                
             }
         })
 
         scene.socket.on('partyLeaders', partyLeaders =>{
-            // if (!scene.UIHandler.partyLeadersDealt) {
-                scene.UIHandler.dealPartyLeaders(partyLeaders)
-            // }
+            scene.UIHandler.dealPartyLeaders(partyLeaders)
             scene.UIHandler.buildLeaderSelectText()
-            // if (scene.socket.id === scene.GameHandler.currentTurn) {
-            //     scene.UIHandler.selectLeader()
-            // }
-            
+        })
+
+        scene.socket.on('dealMonster', monster => {
+            scene.DeckHandler.dealMonster(monster)
         })
 
         scene.socket.on('updatePlayers', players => {
@@ -71,17 +79,16 @@ export default class SocketHandler {
             scene.DeckHandler.drawCard(card, player)
         })
 
-        scene.socket.on('ready', (socketId, cards) => {
-            if (socketId === scene.socket.id) {
-                for (let i in cards) {
-                    let card = scene.GameHandler.players[socketId].hand.push(scene.DeckHandler.dealCard(155 + (i * 155), 860, cards[i], scene.socket.id))
-                    
-                }
-            } else {
-                pass
+        scene.socket.on('heroPlayed', (name, player) => {
+            if (player !== scene.socket.id) {
+                // let card = scene.UIHandler.areas[player].handArea.cards.splice(scene.UIHandler.areas[player].handArea.cards.indexOf(name), 1)
+                let card = scene.UIHandler.areas[player].handArea.cards.find(card => card.getData('name') === name)
+                scene.UIHandler.areas[player].handArea.cards.splice(scene.UIHandler.areas[player].handArea.cards.indexOf(card), 1)
+                scene.CardHandler.moveToHeroArea(card)
+                .then(() => scene.CardHandler.flipCard(card))
+                scene.UIHandler.areas[player].heroArea.data.list.heroes.push(card)
             }
         })
-
         // scene.socket.on('cardPlayed', (cardName, socketId) => {
         //     if (socketId !== scene.socket.id) {
         //         scene.GameHandler.opponent.hand.shift().destroy()
