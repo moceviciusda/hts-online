@@ -5,5 +5,6 @@ export default class Bullseye extends Card {
         super(scene)
         this.name = 'bullseye'
         this.cardSprite = 'bullseye'
+        this.type = 'hero'
     }
 }

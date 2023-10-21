@@ -5,5 +5,6 @@ export default class BunBun extends Card {
         super(scene)
         this.name = 'bunBun'
         this.cardSprite = 'bunBun'
+        this.type = 'hero'
     }
 }

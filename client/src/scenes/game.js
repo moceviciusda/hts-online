@@ -47,10 +47,23 @@ export default class Game extends Phaser.Scene {
         this.load.image('calmingVoice', 'src/assets/heroes/Calming_Voice.png')
         this.load.image('silentShadow', 'src/assets/heroes/Silent_Shadow.png')
         this.load.image('tipsyTootie', 'src/assets/heroes/Tipsy_Tootie.png')
+
+        this.load.image('bardMask', 'src/assets/items/Bard_Mask.png')
+        this.load.image('decoyDoll', 'src/assets/items/Decoy_Doll.png')
+        this.load.image('fighterMask', 'src/assets/items/Fighter_Mask.png')
+        this.load.image('guardianMask', 'src/assets/items/Guardian_Mask.png')
+        this.load.image('particularlyRustyCoin', 'src/assets/items/Particularly_Rusty_Coin.png')
+        this.load.image('rangerMask', 'src/assets/items/Ranger_Mask.png')
+        this.load.image('reallyBigRing', 'src/assets/items/Really_Big_Ring.png')
+        this.load.image('thiefMask', 'src/assets/items/Thief_Mask.png')
+        this.load.image('wizardMask', 'src/assets/items/Wizard_Mask.png')
+
+        this.load.image('curseOfTheSnakesEyes', 'src/assets/cursed_items/Curse_of_the_Snakes_Eyes.png')
+        this.load.image('sealingKey', 'src/assets/cursed_items/Sealing_Key.png')
+        this.load.image('suspiciouslyShinyCoin', 'src/assets/cursed_items/Suspiciously_Shiny_Coin.png')
     }
 
     create() {
-
         this.CardHandler = new CardHandler(this)
         this.DeckHandler = new DeckHandler(this)
         this.GameHandler = new GameHandler(this)

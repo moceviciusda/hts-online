@@ -5,5 +5,6 @@ export default class SilentShadow extends Card {
         super(scene)
         this.name = 'silentShadow'
         this.cardSprite = 'silentShadow'
+        this.type = 'hero'
     }
 }

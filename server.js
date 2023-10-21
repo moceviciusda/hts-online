@@ -10,28 +10,34 @@ const io = require('socket.io')(http, {
 })
 
 const shuffle = require('shuffle-array')
-let numberOfPlayers = 2
-let gameTurn = 0
+let numberOfPlayers = 4
+let gameTurn = 1
 let players = {}
 let spectators = []
 let partyLeaders = ['theCharismaticSong', 'theCloakedSage', 'theDivineArrow', 'theFistOfReason', 'theProtectingHorn', 'theShadowClaw']
 let monsterDeck = ['abyssQueen', 'anuranCauldron', 'arcticAries', 'bloodwing', 'corruptedSabretooth', 'crownedSerpent', 'darkDragonWing', 'dracos', 'malamammoth', 'megaSlime', 'orthus', 'rexMajor', 'terratuga', 'titanWyvern', 'warwornOwlbear']
 let monsters = []
-let deck = ['bearClaw', 'bullseye', 'bunBun', 'calmingVoice', 'silentShadow', 'tipsyTootie','bearClaw', 'bullseye', 'bunBun', 'calmingVoice', 'silentShadow', 'tipsyTootie','bearClaw', 'bullseye', 'bunBun', 'calmingVoice', 'silentShadow', 'tipsyTootie','bearClaw', 'bullseye', 'bunBun', 'calmingVoice', 'silentShadow', 'tipsyTootie']
-// let readyCheck = 0
+let deck = ['bearClaw', 'bullseye', 'bunBun', 'calmingVoice', 'silentShadow', 'tipsyTootie','bearClaw', 'bullseye', 'bunBun', 'calmingVoice', 'silentShadow', 'tipsyTootie','bearClaw', 'bullseye', 'bunBun', 'calmingVoice', 'silentShadow', 'tipsyTootie','bearClaw', 'bullseye', 'bunBun', 'calmingVoice', 'silentShadow', 'tipsyTootie', 'bardMask', 'decoyDoll', 'fighterMask', 'guardianMask', 'particularlyRustyCoin', 'particularlyRustyCoin', 'rangerMask', 'reallyBigRing', 'reallyBigRing', 'thiefMask', 'wizardMask', 'curseOfTheSnakesEyes', 'curseOfTheSnakesEyes', 'sealingKey', 'suspiciouslyShinyCoin']
 let gameState = 'initializing'
 let currentTurn
 let leaderMovedCount = 0
 
+let alert = alert => {
+    io.emit('alert', alert)
+}
+
 let setGameState = state => {
     gameState = state
+    console.log('Game state:', gameState)
     io.emit('setGameState', gameState)
 }
 
 let nextTurn = () => {
-    gameTurn >= Object.keys(players).length -1 ? gameTurn = 0 : gameTurn++
-    currentTurn = Object.keys(players)[gameTurn]
+    gameTurn >= Object.keys(players).length ? gameTurn = 1 : gameTurn++
+    currentTurn = Object.keys(players)[gameTurn-1]
+    console.log('Current turn:', currentTurn)
     io.emit('setCurrentTurn', currentTurn)
+    alert(`Player ${gameTurn}'s Turn`)
 }
 
 let drawCard = player => {
@@ -41,25 +47,6 @@ let drawCard = player => {
     io.emit('updatePlayers', players)
     io.emit('updateDeck', deck)
 }
-
-// let dealMonsters = () => {
-//     dealMonster()
-//     .then(() => {dealMonster()
-//         .then(() => {dealMonster()})})
-// }
-
-// let dealMonster = socket = new Promise(resolve => {
-//     let counter = 0
-//     let monster = monsterDeck.shift()
-//     monsters.push(monster)
-//     // io.emit('updateMonsters')
-//     io.emit('dealMonster', monster)
-//     socket.on('monsterMoved', () => {
-//         if (counter >= Object.keys(players).length) {
-//             resolve()
-//         }
-//     })
-// })
 
 let dealMonster = () => {
     let monster = monsterDeck.shift()
@@ -78,7 +65,7 @@ let dealHands = () => {
 }
 
 io.on('connection', socket => {
-    console.log('User Connected: ' + socket.id)
+    console.log('User Connected:' + socket.id)
     if (Object.keys(players).length < numberOfPlayers) {
         players[socket.id] = {
             partyLeader: null,
@@ -93,9 +80,9 @@ io.on('connection', socket => {
         spectators.push(socket.id)
     }
 
-    socket.on('gameTurn', socketId => {
+    socket.on('endTurn', socketId => {
         nextTurn()
-        console.log(gameTurn, ': ', currentTurn)
+        console.log(gameTurn, ':', currentTurn)
     })
 
     socket.on('ready', socketId => {
@@ -104,14 +91,10 @@ io.on('connection', socket => {
         io.emit('updateDeck', deck)
         console.log(players)
         if (Object.keys(players).length < numberOfPlayers) return
+
         io.emit('updatePlayers', players)
         setGameState('partyLeaderSelection')
-        console.log('Game state: partyLeaderSelection')
         io.emit('partyLeaders', partyLeaders)
-        
-        // io.emit('changeGameState', 'readyCheck')
-        // console.log('Game state: readyCheck')
-        // io.emit('updatePlayers', players)
     })
 
     socket.on('leaderPicked', (socketId, partyLeader) => {
@@ -145,9 +128,17 @@ io.on('connection', socket => {
     })
 
     socket.on('heroPlayed', (name, socketId) => {
+        console.log(socketId, 'played:', name)
         players[socketId].hand.splice(players[socketId].hand.indexOf(name), 1)
         players[socketId].heroes.push(name)
         io.emit('heroPlayed', name, socketId)
+    })
+
+    socket.on('itemEquiped', (name, hero, socketId) => {
+        console.log(socketId, 'equiped:', name, 'on', hero)
+        players[socketId].hand.splice(players[socketId].hand.indexOf(name), 1)
+        // players[socketId].heroes.push(name)
+        io.emit('itemEquiped', name, hero, socketId)
     })
 
     // socket.on('ready', socketId => {

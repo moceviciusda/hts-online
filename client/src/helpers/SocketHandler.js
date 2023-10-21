@@ -10,8 +10,15 @@ export default class SocketHandler {
             scene.UIHandler.assignPlayerAreas()
         })
 
+        scene.socket.on('alert', alert => {
+            scene.UIHandler.alert(alert)
+        })
+
         scene.socket.on('setCurrentTurn', currentTurn => {
             scene.GameHandler.setCurrentTurn(currentTurn)
+            if (scene.GameHandler.gameState === 'ready') {
+                scene.endTurn.setInteractive()
+            }
         })
 
         scene.socket.on('setGameState', gameState => {
@@ -84,7 +91,6 @@ export default class SocketHandler {
 
         scene.socket.on('heroPlayed', (name, player) => {
             if (player !== scene.socket.id) {
-                // let card = scene.UIHandler.areas[player].handArea.cards.splice(scene.UIHandler.areas[player].handArea.cards.indexOf(name), 1)
                 let card = scene.UIHandler.areas[player].handArea.cards.find(card => card.getData('name') === name)
                 scene.UIHandler.areas[player].handArea.cards.splice(scene.UIHandler.areas[player].handArea.cards.indexOf(card), 1)
 
@@ -95,13 +101,20 @@ export default class SocketHandler {
                 scene.UIHandler.areas[player].heroArea.data.list.heroes.push(card)
             }
         })
-        // scene.socket.on('cardPlayed', (cardName, socketId) => {
-        //     if (socketId !== scene.socket.id) {
-        //         scene.GameHandler.opponent.hand.shift().destroy()
-        //         scene.DeckHandler.dealCard(scene.playerHeroArea.x, scene.playerHeroArea.y, cardName)
-        //     }
-        // })
 
+        scene.socket.on('itemEquiped', (itemName, heroName, player) => {
+            if (player !== scene.socket.id) {
+                let item = scene.UIHandler.areas[player].handArea.cards.find(card => card.getData('name') === itemName)
+                scene.UIHandler.areas[player].handArea.cards.splice(scene.UIHandler.areas[player].handArea.cards.indexOf(item), 1)
+
+                let hero = scene.UIHandler.heroesOnBoard().find(card => card.getData('name') === heroName)
+                scene.CardHandler.equipItem(item, hero)
+                .then(() => scene.CardHandler.flipCard(item))
+                .then(() => scene.CardHandler.stackHand(player))
+
+                hero.setData('item', item)
+            }
+        })
 
     }
 }

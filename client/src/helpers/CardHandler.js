@@ -35,19 +35,19 @@ export default class CardHandler {
                 case 90:
                     xSpread = 0
                     ySpread = 100
-                    break;
+                    break
                 case 180:
                     xSpread = -100
                     ySpread = 0
-                    break;
-                case 270:
+                    break
+                case -90:
                     xSpread = 0
                     ySpread = -100
-                    break;
+                    break
                 default:
                     xSpread = 100
                     ySpread = 0
-                    break;
+                    break
             }
             let tween = scene.tweens.add({
                 targets: card,
@@ -66,19 +66,19 @@ export default class CardHandler {
             let xSpread, ySpread, xPlus, yPlus
             switch (scene.UIHandler.areas[card.getData('owner')].angle) {
                 case 90:
-                case 270:
+                case -90:
                     xSpread = 0
                     ySpread = card.displayWidth
                     xPlus = card.displayHeight/2
                     yPlus = card.displayWidth/2
-                    break;
+                    break
                 case 180:
                 default:
                     xSpread = card.displayWidth
                     ySpread = 0
                     xPlus = card.displayWidth/2
                     yPlus = card.displayHeight/2
-                    break;
+                    break
             }
             let tween = scene.tweens.add({
                 targets: card,
@@ -87,11 +87,47 @@ export default class CardHandler {
                 angle: scene.UIHandler.areas[card.getData('owner')].angle,
                 duration: 300,
                 onComplete: () => {
+                    card.input.dropZone = true
                     resolve()
                     tween.remove()
                 }
             })
         })
+
+        this.equipItem = (item, hero) => new Promise(resolve => {
+            let xPlus, yPlus
+            switch (hero.angle) {
+                case 90:
+                    xPlus = -40
+                    yPlus = 0
+                    break
+                case -90:
+                    xPlus = 40
+                    yPlus = 0
+                    break
+                case 180:
+                    xPlus = 0
+                    yPlus = -40
+                    break
+                default:
+                    xPlus = 0
+                    yPlus = 40
+                    break
+            }
+            scene.children.bringToTop(hero)
+            let tween = scene.tweens.add({
+                targets: item,
+                x: hero.x + xPlus,
+                y: hero.y + yPlus,
+                angle: hero.angle,
+                duration: 300,
+                onComplete: () => {
+                    resolve()
+                    tween.remove()
+                }
+            })
+        })
+
 
         this.stickOut = card => {
             let tween = scene.tweens.add({
@@ -151,7 +187,7 @@ export default class CardHandler {
                     x = hand.x - xSpread*hand.cards.length/2
                     y = hand.y
                     break;
-                case 270:
+                case -90:
                     xSpread = 0
                     ySpread = -100
                     x = hand.x

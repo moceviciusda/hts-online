@@ -8,14 +8,14 @@ export default class UIHandler {
         this.partyLeadersDealt = false
 
         this.buildCommonAreas = () => {
-            scene.monsterArea = scene.add.rectangle(960 - 110, 540, 688, 300).setStrokeStyle(4, 0xff69b4)
-            scene.deckArea = scene.add.rectangle(1304, 540+79, 220, 158).setStrokeStyle(4, 0xff69b4)
-            scene.discardArea = scene.add.rectangle(1304, 540-79, 220, 158).setStrokeStyle(4, 0xff69b4)
+            scene.monsterArea = scene.add.rectangle(scene.scale.width/2 - 110, scene.scale.height/2, 688, 300).setStrokeStyle(4, 0xff69b4)
+            scene.deckArea = scene.add.rectangle(1304, scene.scale.height/2+79, 220, 158).setStrokeStyle(4, 0xff69b4)
+            scene.discardArea = scene.add.rectangle(1304, scene.scale.height/2-79, 220, 158).setStrokeStyle(4, 0xff69b4)
         }
 
         this.buildPlayerAreas = () => {
-            scene.playerHandArea = {x: 960, y: 1080, cards: []}
-            scene.playerHeroArea = this.zoneHandler.renderZone(960, 800, 1078, 216).setData('heroes', [])
+            scene.playerHandArea = {x: scene.scale.width/2, y: scene.scale.height, cards: []}
+            scene.playerHeroArea = this.zoneHandler.renderZone(scene.scale.width/2, 800, 1078, 216).setData('heroes', [])
             this.zoneHandler.renderOutline(scene.playerHeroArea, 0xff69b4)
             scene.playerLeaderArea = scene.add.rectangle(702, 1000, 172, 300).setStrokeStyle(4, 0xff69b4)
             scene.playerSlayArea = scene.add.rectangle(1046, 1000, 516, 300).setStrokeStyle(4, 0xff69b4)
@@ -32,20 +32,20 @@ export default class UIHandler {
         }
 
         this.buildOpponentAreas = () => {
-            scene.topOpponentHandArea = {x: 960, y: 0, cards: []}
-            scene.topOpponentHeroArea = scene.add.rectangle(960, 280, 1078, 216).setStrokeStyle(4, 0xff69b4).setData('heroes', [])
+            scene.topOpponentHandArea = {x: scene.scale.width/2, y: 0, cards: []}
+            scene.topOpponentHeroArea = scene.add.rectangle(scene.scale.width/2, 280, 1078, 216).setStrokeStyle(4, 0xff69b4).setData('heroes', [])
             scene.topOpponentLeaderArea = scene.add.rectangle(1218, 80, 172, 300).setStrokeStyle(4, 0xff69b4)
             scene.topOpponentSlayArea = scene.add.rectangle(874, 80, 516, 300).setStrokeStyle(4, 0xff69b4)
 
-            scene.leftOpponentHandArea = {x: 0, y: 540, cards: []}
-            scene.leftOpponentHeroArea = scene.add.rectangle(280, 540, 216, 1078).setStrokeStyle(4, 0xff69b4).setData('heroes', [])
+            scene.leftOpponentHandArea = {x: 0, y: scene.scale.height/2, cards: []}
+            scene.leftOpponentHeroArea = scene.add.rectangle(280, scene.scale.height/2, 216, 1078).setStrokeStyle(4, 0xff69b4).setData('heroes', [])
             scene.leftOpponentLeaderArea = scene.add.rectangle(80, 282, 300, 172).setStrokeStyle(4, 0xff69b4)
-            scene.leftOpponentSlayArea = scene.add.rectangle(80, 540 + 86, 300, 516).setStrokeStyle(4, 0xff69b4)
+            scene.leftOpponentSlayArea = scene.add.rectangle(80, scene.scale.height/2 + 86, 300, 516).setStrokeStyle(4, 0xff69b4)
 
-            scene.rightOpponentHandArea = {x: 1920, y: 540, cards: []}
-            scene.rightOpponentHeroArea = scene.add.rectangle(1640, 540, 216, 1078).setStrokeStyle(4, 0xff69b4).setData('heroes', [])
+            scene.rightOpponentHandArea = {x: scene.scale.width, y: scene.scale.height/2, cards: []}
+            scene.rightOpponentHeroArea = scene.add.rectangle(1640, scene.scale.height/2, 216, 1078).setStrokeStyle(4, 0xff69b4).setData('heroes', [])
             scene.rightOpponentLeaderArea = scene.add.rectangle(1840, 798, 300, 172).setStrokeStyle(4, 0xff69b4)
-            scene.rightOpponentSlayArea = scene.add.rectangle(1840, 540 - 86, 300, 516).setStrokeStyle(4, 0xff69b4)
+            scene.rightOpponentSlayArea = scene.add.rectangle(1840, scene.scale.height/2 - 86, 300, 516).setStrokeStyle(4, 0xff69b4)
 
             this.availableAreas = [
                 {
@@ -67,9 +67,13 @@ export default class UIHandler {
                     heroArea: scene.rightOpponentHeroArea,
                     leaderArea: scene.rightOpponentLeaderArea,
                     slayArea: scene.rightOpponentSlayArea,
-                    angle: 270
+                    angle: -90
                 }
             ]
+        }
+
+        this.heroesOnBoard = () => {
+            return scene.playerHeroArea.getData('heroes').concat(scene.topOpponentHeroArea.getData('heroes'), scene.leftOpponentHeroArea.getData('heroes'), scene.rightOpponentHeroArea.getData('heroes'))
         }
 
         this.buildGameText = () => {
@@ -81,7 +85,7 @@ export default class UIHandler {
         this.dealPartyLeaders = (partyLeaders) => {
             if (!scene.GameHandler.partyLeaders.length) {
                 partyLeaders.forEach((partyLeader, i) => {
-                    let card = scene.DeckHandler.dealCard(410 + (i * 220), 540, partyLeader, null)
+                    let card = scene.DeckHandler.dealCard(scene.scale.width/2 - partyLeaders.length*220/2 + 110 + (i * 220), scene.scale.height/2, partyLeader, null)
                     scene.GameHandler.partyLeaders.push(card)
                 })
             } else {
@@ -109,6 +113,29 @@ export default class UIHandler {
                 scene.leaderSelectionText.setText('Choose your party leader')
                 scene.InteractivityHandler.confirmLeaderInteractivity()
             }
+        }
+
+        this.alert = message => {
+            scene.alertText = scene.add.text(960, 540, message)
+            scene.alertText.setFontSize(64).setFontFamily('Trebuchet MS').setColor('#00ffff').setDepth(10).setOrigin(0.5, 0.5).setAlpha(0)
+            let appear = scene.tweens.add({
+                targets: scene.alertText,
+                alpha: 1,
+                duration: 800,
+                onComplete: () => {
+                    let disappear = scene.tweens.add({
+                        targets: scene.alertText,
+                        alpha: 0,
+                        delay: 2500,
+                        duration: 600,
+                        onComplete: () => {
+                            scene.alertText.destroy()
+                            disappear.remove()
+                        }
+                    })
+                    appear.remove()
+                }
+            })
         }
 
         this.buildUI = () => {

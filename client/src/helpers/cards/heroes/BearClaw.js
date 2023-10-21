@@ -5,5 +5,6 @@ export default class BearClaw extends Card {
         super(scene)
         this.name = 'bearClaw'
         this.cardSprite = 'bearClaw'
+        this.type = 'hero'
     }
 }

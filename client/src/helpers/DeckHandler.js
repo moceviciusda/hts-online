@@ -1,6 +1,3 @@
-// import RealCrystal from "./cards/RealCrystal";
-// import FakeCrystal from "./cards/FakeCrystal";
-
 import CardBack from "./cards/CardBack"
 import MonsterCardBack from "./cards/monsters/MonsterCardBack"
 
@@ -33,6 +30,20 @@ import BunBun from "./cards/heroes/BunBun"
 import CalmingVoice from "./cards/heroes/CalmingVoice"
 import SilentShadow from "./cards/heroes/SilentShadow"
 import TipsyTootie from "./cards/heroes/TipsyTootie"
+
+import BardMask from "./cards/items/BardMask"
+import DecoyDoll from "./cards/items/DecoyDoll"
+import FighterMask from "./cards/items/FighterMask"
+import GuardianMask from "./cards/items/GuardianMask"
+import ParticularlyRustyCoin from "./cards/items/ParticularlyRustyCoin"
+import RangerMask from "./cards/items/RangerMask"
+import ReallyBigRing from "./cards/items/ReallyBigRing"
+import ThiefMask from "./cards/items/ThiefMask"
+import WizardMask from "./cards/items/WizardMask"
+
+import CurseOfTheSnakesEyes from "./cards/cursed_items/CurseOfTheSnakesEyes"
+import SealingKey from "./cards/cursed_items/SealingKey"
+import SuspiciouslyShinyCoin from "./cards/cursed_items/SuspiciouslyShinyCoin"
 
 
 
@@ -81,13 +92,25 @@ export default class DeckHandler {
                 calmingVoice: new CalmingVoice(scene),
                 silentShadow: new SilentShadow(scene),
                 tipsyTootie: new TipsyTootie(scene),
-                
+
+                bardMask: new BardMask(scene),
+                decoyDoll: new DecoyDoll(scene),
+                fighterMask: new FighterMask(scene),
+                guardianMask: new GuardianMask(scene),
+                particularlyRustyCoin: new ParticularlyRustyCoin(scene),
+                rangerMask: new RangerMask(scene),
+                reallyBigRing: new ReallyBigRing(scene),
+                thiefMask: new ThiefMask(scene),
+                wizardMask: new WizardMask(scene),
+
+                curseOfTheSnakesEyes: new CurseOfTheSnakesEyes(scene),
+                sealingKey: new SealingKey(scene),
+                suspiciouslyShinyCoin: new SuspiciouslyShinyCoin(scene), 
             }
             let newCard = cards[name]
             console.log(newCard)
+            
             return newCard.render(x, y, owner)
-            // newCard.render(x, y, owner)
-            // return scene.add.container(x, y, newCard)
         }
 
         // this.dealDeck = (deckList, owner) => {

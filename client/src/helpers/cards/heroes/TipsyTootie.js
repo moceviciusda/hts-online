@@ -5,5 +5,6 @@ export default class TipsyTootie extends Card {
         super(scene)
         this.name = 'tipsyTootie'
         this.cardSprite = 'tipsyTootie'
+        this.type = 'hero'
     }
 }

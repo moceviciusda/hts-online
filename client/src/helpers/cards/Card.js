@@ -22,6 +22,9 @@ export default class Card {
                 'backSprite': 'htsCardBack',
                 'location': 'deck'
             })
+            if (this.type === 'hero') {
+                card.setData('item', null)
+            }
 
             if (owner === scene.socket.id) {
                 scene.input.setDraggable(card)

@@ -5,5 +5,6 @@ export default class CalmingVoice extends Card {
         super(scene)
         this.name = 'calmingVoice'
         this.cardSprite = 'calmingVoice'
+        this.type = 'hero'
     }
 }
