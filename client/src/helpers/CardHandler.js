@@ -56,6 +56,7 @@ export default class CardHandler {
                 angle: scene.UIHandler.areas[owner].angle,
                 duration: 300,
                 onComplete: () => {
+                    card.setData('location', 'hand')
                     resolve()
                     tween.remove()
                 }
@@ -87,6 +88,7 @@ export default class CardHandler {
                 angle: scene.UIHandler.areas[card.getData('owner')].angle,
                 duration: 300,
                 onComplete: () => {
+                    card.setData('location', 'board')
                     card.input.dropZone = true
                     resolve()
                     tween.remove()
@@ -122,6 +124,8 @@ export default class CardHandler {
                 angle: hero.angle,
                 duration: 300,
                 onComplete: () => {
+                    item.setData('location', 'board')
+                    hero.setData('item', item)
                     resolve()
                     tween.remove()
                 }

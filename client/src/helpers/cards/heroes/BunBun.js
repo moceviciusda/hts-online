@@ -6,5 +6,6 @@ export default class BunBun extends Card {
         this.name = 'bunBun'
         this.cardSprite = 'bunBun'
         this.type = 'hero'
+        this.class = 'wizard'
     }
 }

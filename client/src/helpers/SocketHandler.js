@@ -111,8 +111,6 @@ export default class SocketHandler {
                 scene.CardHandler.equipItem(item, hero)
                 .then(() => scene.CardHandler.flipCard(item))
                 .then(() => scene.CardHandler.stackHand(player))
-
-                hero.setData('item', item)
             }
         })
 

@@ -10,7 +10,7 @@ const io = require('socket.io')(http, {
 })
 
 const shuffle = require('shuffle-array')
-let numberOfPlayers = 4
+let numberOfPlayers = 2
 let gameTurn = 1
 let players = {}
 let spectators = []
@@ -98,7 +98,6 @@ io.on('connection', socket => {
     })
 
     socket.on('leaderPicked', (socketId, partyLeader) => {
-        // partyLeaders.splice(partyLeaders.indexOf(partyLeader))
         players[socketId].partyLeader = partyLeader
         io.emit('updatePlayers', players)
         for (let player in players) {
@@ -118,11 +117,6 @@ io.on('connection', socket => {
             for (let i = 0; i < 3; i++) {
                 dealMonster()
             }
-            // dealMonster(socket).then(() => {
-            //     dealMonster(socket).then(() => {
-            //         dealMonster(socket)
-            //     })
-            // })
             setGameState('ready')
         }
     })
@@ -140,23 +134,6 @@ io.on('connection', socket => {
         // players[socketId].heroes.push(name)
         io.emit('itemEquiped', name, hero, socketId)
     })
-
-    // socket.on('ready', socketId => {
-    //     console.log('Player Ready: ', socketId)
-    //     if (socketId in players) {
-    //         for (let i = 0; i < 5; i++) {
-    //             players[socketId].hand.push(deck.shift())
-    //         }
-    //         console.log(players)
-    //         io.emit('ready', socketId, players[socketId].hand)
-    //         readyCheck++
-    //         if (readyCheck >= 2) {
-    //             gameState = "ready"
-    //             io.emit('setGameState', 'ready')
-    //         }
-    //     }
-    // })
-
 })
 
 

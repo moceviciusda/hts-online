@@ -6,5 +6,6 @@ export default class Bullseye extends Card {
         this.name = 'bullseye'
         this.cardSprite = 'bullseye'
         this.type = 'hero'
+        this.class = 'ranger'
     }
 }

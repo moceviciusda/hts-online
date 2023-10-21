@@ -138,6 +138,22 @@ export default class UIHandler {
             })
         }
 
+        this.buildCardPreview = card => {
+            if (card.getData('item')) {
+                scene.itemPreview = scene.add.image(scene.scale.width/2, scene.scale.height/2+80, card.getData('item').getData('sprite'))
+            }
+            scene.cardPreview = scene.add.image(scene.scale.width/2, scene.scale.height/2, card.getData('sprite'))
+        }
+
+        this.destroyCardPreview = () => {
+            if (scene.cardPreview) {
+                scene.cardPreview.destroy()
+            }
+            if (scene.itemPreview) {
+                scene.itemPreview.destroy()
+            }
+        }
+
         this.buildUI = () => {
             this.buildCommonAreas()
             this.buildPlayerAreas()

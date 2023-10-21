@@ -6,5 +6,6 @@ export default class BearClaw extends Card {
         this.name = 'bearClaw'
         this.cardSprite = 'bearClaw'
         this.type = 'hero'
+        this.class = 'fighter'
     }
 }

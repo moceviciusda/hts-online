@@ -6,5 +6,6 @@ export default class SilentShadow extends Card {
         this.name = 'silentShadow'
         this.cardSprite = 'silentShadow'
         this.type = 'hero'
+        this.class = 'thief'
     }
 }

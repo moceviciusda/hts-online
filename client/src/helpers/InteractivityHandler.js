@@ -4,6 +4,8 @@ export default class InteractivityHandler {
     constructor(scene) {
         this.UIHandler = new UIHandler(scene)
         
+        this.isDragging = false
+
         this.gameTextInteractivity = () => {
             scene.endTurn.on('pointerover', () => {
                 scene.endTurn.setColor('#ff69b4')
@@ -61,7 +63,7 @@ export default class InteractivityHandler {
             if (gameObjects[0].type === 'Image' && scene.GameHandler.gameState === 'partyLeaderSelection') {
                 scene.children.bringToTop(gameObjects[0])
             }
-            if (gameObjects[0].type === 'Image' && scene.GameHandler.gameState !== 'partyLeaderSelection' && gameObjects[0].getData('type') === 'hero') {
+            if (gameObjects[0].type === 'Image' && scene.GameHandler.gameState !== 'partyLeaderSelection' && gameObjects[0].getData('location') === 'hand') {
                 scene.children.bringToTop(gameObjects[0])
             }
             
@@ -71,12 +73,16 @@ export default class InteractivityHandler {
                 //     scene.CardHandler.stickOut(gameObjects[0])
                 //     console.log('stickingOut')
                 // }
-                scene.fadeBackground.setVisible(true)
-                scene.children.bringToTop(scene.fadeBackground)
-                if (gameObjects[0].getData('type') === 'hero') {
-                    scene.children.bringToTop(gameObjects[0])
-                }
-                scene.cardPreview = scene.add.image(960, 540, gameObjects[0].getData('sprite')) //.setScale(1, 1)
+                this.previewTimer = scene.time.delayedCall(500, () => {
+                    if (!this.isDragging){
+                        scene.fadeBackground.setVisible(true)
+                        scene.children.bringToTop(scene.fadeBackground)
+                        if (gameObjects[0].getData('type') === 'hero') {
+                            scene.children.bringToTop(gameObjects[0])
+                        }
+                        scene.UIHandler.buildCardPreview(gameObjects[0])
+                    }
+                })
             }
         })
 
@@ -86,8 +92,14 @@ export default class InteractivityHandler {
                 //     console.log('stickingIn')
                 //     scene.CardHandler.stickIn(gameObjects[0])
                 // }
-                scene.cardPreview.setVisible(false)
-                scene.fadeBackground.setVisible(false)
+                scene.UIHandler.destroyCardPreview()
+                if (this.previewTimer) {
+                    this.previewTimer.remove()
+                }
+                
+                if (!this.isDragging) {
+                    scene.fadeBackground.setVisible(false)
+                }
             }
         })
 
@@ -98,17 +110,22 @@ export default class InteractivityHandler {
 
 
         scene.input.on('dragstart', (pointer, gameObject) => {
-            scene.cardPreview.setVisible(false)
-            scene.fadeBackground.setVisible(false)
+            this.isDragging = true
+            scene.UIHandler.destroyCardPreview()
+            
+            // scene.fadeBackground.setVisible(false)
             scene.children.bringToTop(gameObject)
             this.highlightArray = []
             if (scene.GameHandler.currentTurn === scene.socket.id && scene.GameHandler.gameState === 'ready') {
+                scene.fadeBackground.setVisible(true)
                 if (gameObject.getData('type') === 'hero') {
                     this.highlightArray.push(this.UIHandler.zoneHandler.renderOutline(scene.playerHeroArea, 0x00ffff))
                 } else if (gameObject.getData('type') === 'item') {
                     scene.UIHandler.heroesOnBoard().forEach(hero => {
                         if (!hero.getData('item')) {
                             this.highlightArray.push(this.UIHandler.zoneHandler.renderOutline(hero, 0x00ffff))
+                            scene.children.bringToTop(hero)
+                            // scene.CardHandler.highlight(hero)
                         }
                     });
                 }
@@ -116,9 +133,11 @@ export default class InteractivityHandler {
         })
 
         scene.input.on('dragend', (pointer, gameObject, dropped) => {
+            this.isDragging = false
+            scene.fadeBackground.setVisible(false)
             if (scene.GameHandler.currentTurn === scene.socket.id && scene.GameHandler.gameState === 'ready') {
                 this.highlightArray.forEach(highlight => {
-                    highlight.clear()
+                    highlight.destroy()
                 })
             }
             if (!dropped) {
