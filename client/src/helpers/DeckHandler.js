@@ -115,6 +115,7 @@ export default class DeckHandler {
             let card = scene.DeckHandler.dealCard(scene.deckArea.x, scene.deckArea.y, name, owner).setData('location', 'hand')
             scene.UIHandler.areas[owner].handArea.cards.push(card)
             scene.CardHandler.moveToHand(card, owner)
+            .then(() => scene.CardHandler.stackHand(owner))
         }
 
         this.dealMonster = name => {

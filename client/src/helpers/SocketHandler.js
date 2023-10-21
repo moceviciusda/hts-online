@@ -49,10 +49,13 @@ export default class SocketHandler {
                 });
                 scene.DeckHandler.dealCard(scene.deckArea.x, scene.deckArea.y, 'cardBack', null).setAngle(-90)
                 scene.DeckHandler.dealCard(scene.monsterArea.x+344-85, scene.monsterArea.y, 'monsterCardBack', null)
+                scene.UIHandler.buildGameText()
             }
 
             if (gameState === 'ready') {
-                
+                if (scene.GameHandler.currentTurn === scene.socket.id) {
+                    scene.endTurn.setInteractive()
+                }
             }
         })
 
@@ -84,8 +87,11 @@ export default class SocketHandler {
                 // let card = scene.UIHandler.areas[player].handArea.cards.splice(scene.UIHandler.areas[player].handArea.cards.indexOf(name), 1)
                 let card = scene.UIHandler.areas[player].handArea.cards.find(card => card.getData('name') === name)
                 scene.UIHandler.areas[player].handArea.cards.splice(scene.UIHandler.areas[player].handArea.cards.indexOf(card), 1)
+
                 scene.CardHandler.moveToHeroArea(card)
                 .then(() => scene.CardHandler.flipCard(card))
+                .then(() => scene.CardHandler.stackHand(player))
+
                 scene.UIHandler.areas[player].heroArea.data.list.heroes.push(card)
             }
         })

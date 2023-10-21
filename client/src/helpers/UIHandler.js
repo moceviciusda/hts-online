@@ -14,8 +14,8 @@ export default class UIHandler {
         }
 
         this.buildPlayerAreas = () => {
-            scene.playerHandArea = {x: 150, y: 1080, cards: []}
-            scene.playerHeroArea = this.zoneHandler.renderZone(960, 800, 790, 220).setData('heroes', [])
+            scene.playerHandArea = {x: 960, y: 1080, cards: []}
+            scene.playerHeroArea = this.zoneHandler.renderZone(960, 800, 1078, 216).setData('heroes', [])
             this.zoneHandler.renderOutline(scene.playerHeroArea, 0xff69b4)
             scene.playerLeaderArea = scene.add.rectangle(702, 1000, 172, 300).setStrokeStyle(4, 0xff69b4)
             scene.playerSlayArea = scene.add.rectangle(1046, 1000, 516, 300).setStrokeStyle(4, 0xff69b4)
@@ -32,18 +32,18 @@ export default class UIHandler {
         }
 
         this.buildOpponentAreas = () => {
-            scene.topOpponentHandArea = {x: 1770, y: 0, cards: []}
-            scene.topOpponentHeroArea = scene.add.rectangle(960, 280, 790, 220).setStrokeStyle(4, 0xff69b4).setData('heroes', [])
+            scene.topOpponentHandArea = {x: 960, y: 0, cards: []}
+            scene.topOpponentHeroArea = scene.add.rectangle(960, 280, 1078, 216).setStrokeStyle(4, 0xff69b4).setData('heroes', [])
             scene.topOpponentLeaderArea = scene.add.rectangle(1218, 80, 172, 300).setStrokeStyle(4, 0xff69b4)
             scene.topOpponentSlayArea = scene.add.rectangle(874, 80, 516, 300).setStrokeStyle(4, 0xff69b4)
 
-            scene.leftOpponentHandArea = {x: 0, y: 150, cards: []}
-            scene.leftOpponentHeroArea = scene.add.rectangle(280, 540, 220, 790).setStrokeStyle(4, 0xff69b4).setData('heroes', [])
+            scene.leftOpponentHandArea = {x: 0, y: 540, cards: []}
+            scene.leftOpponentHeroArea = scene.add.rectangle(280, 540, 216, 1078).setStrokeStyle(4, 0xff69b4).setData('heroes', [])
             scene.leftOpponentLeaderArea = scene.add.rectangle(80, 282, 300, 172).setStrokeStyle(4, 0xff69b4)
             scene.leftOpponentSlayArea = scene.add.rectangle(80, 540 + 86, 300, 516).setStrokeStyle(4, 0xff69b4)
 
-            scene.rightOpponentHandArea = {x: 1920, y: 930, cards: []}
-            scene.rightOpponentHeroArea = scene.add.rectangle(1640, 540, 220, 790).setStrokeStyle(4, 0xff69b4).setData('heroes', [])
+            scene.rightOpponentHandArea = {x: 1920, y: 540, cards: []}
+            scene.rightOpponentHeroArea = scene.add.rectangle(1640, 540, 216, 1078).setStrokeStyle(4, 0xff69b4).setData('heroes', [])
             scene.rightOpponentLeaderArea = scene.add.rectangle(1840, 798, 300, 172).setStrokeStyle(4, 0xff69b4)
             scene.rightOpponentSlayArea = scene.add.rectangle(1840, 540 - 86, 300, 516).setStrokeStyle(4, 0xff69b4)
 
@@ -73,9 +73,9 @@ export default class UIHandler {
         }
 
         this.buildGameText = () => {
-            // scene.ready = scene.add.text(1560, 540, 'Ready!')
-            // console.log('building text')
-            // scene.ready.setFontSize(18).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5).setInteractive() //.setInteractive()
+            scene.endTurn = scene.add.text(1420, 950, 'End Turn')
+            scene.endTurn.setFontSize(32).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5)
+            scene.InteractivityHandler.gameTextInteractivity()
         }
         
         this.dealPartyLeaders = (partyLeaders) => {
@@ -101,9 +101,9 @@ export default class UIHandler {
                 scene.confirmLeader.destroy()
             }
             scene.leaderSelectionText = scene.add.text(960, 150, 'Another Player is choosing party leader')
-            scene.leaderSelectionText.setFontSize(32).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5)
+            scene.leaderSelectionText.setFontSize(48).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5)
             scene.confirmLeader = scene.add.text(960, 900, 'Confirm Leader')
-            scene.confirmLeader.setFontSize(32).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5)
+            scene.confirmLeader.setFontSize(48).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5)
 
             if (scene.GameHandler.currentTurn === scene.socket.id) {
                 scene.leaderSelectionText.setText('Choose your party leader')
@@ -117,7 +117,7 @@ export default class UIHandler {
             this.buildOpponentAreas()
             scene.fadeBackground = scene.add.graphics()
             scene.fadeBackground.fillStyle(0x000000, 0.9).fillRect(0, 0, 1920, 1080)
-            this.buildGameText()
+            // this.buildGameText()
         }
     }
 }

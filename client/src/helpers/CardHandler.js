@@ -63,30 +63,27 @@ export default class CardHandler {
         })
 
         this.moveToHeroArea = card => new Promise(resolve => {
-            let xSpread, ySpread
+            let xSpread, ySpread, xPlus, yPlus
             switch (scene.UIHandler.areas[card.getData('owner')].angle) {
                 case 90:
-                    xSpread = 0
-                    ySpread = card.displayWidth
-                    break;
-                case 180:
-                    xSpread = card.displayWidth
-                    ySpread = 0
-                    break;
                 case 270:
                     xSpread = 0
                     ySpread = card.displayWidth
+                    xPlus = card.displayHeight/2
+                    yPlus = card.displayWidth/2
                     break;
+                case 180:
                 default:
                     xSpread = card.displayWidth
                     ySpread = 0
+                    xPlus = card.displayWidth/2
+                    yPlus = card.displayHeight/2
                     break;
             }
             let tween = scene.tweens.add({
                 targets: card,
-                // dropZone.x - dropZone.input.hitArea.width/2
-                x: scene.UIHandler.areas[card.getData('owner')].heroArea.x - scene.UIHandler.areas[card.getData('owner')].heroArea.width/2 + card.displayWidth/2 + xSpread*scene.UIHandler.areas[card.getData('owner')].heroArea.getData('heroes').length,
-                y: scene.UIHandler.areas[card.getData('owner')].heroArea.y - scene.UIHandler.areas[card.getData('owner')].heroArea.height/2 + card.displayHeight/2 +  ySpread*scene.UIHandler.areas[card.getData('owner')].heroArea.getData('heroes').length,
+                x: scene.UIHandler.areas[card.getData('owner')].heroArea.x - scene.UIHandler.areas[card.getData('owner')].heroArea.width/2 + xPlus + xSpread*scene.UIHandler.areas[card.getData('owner')].heroArea.getData('heroes').length,
+                y: scene.UIHandler.areas[card.getData('owner')].heroArea.y - scene.UIHandler.areas[card.getData('owner')].heroArea.height/2 + yPlus +  ySpread*scene.UIHandler.areas[card.getData('owner')].heroArea.getData('heroes').length,
                 angle: scene.UIHandler.areas[card.getData('owner')].angle,
                 duration: 300,
                 onComplete: () => {
@@ -138,42 +135,100 @@ export default class CardHandler {
             }
         }
         
-        // this.stackHand = hand => {
-        //     for (let i=0; i<hand.length; i++) {
-        //         scene.children.bringToTop(hand[i])
-        //         if (hand === scene.GameHandler.player.hand) {
-        //             let tween = scene.tweens.add({
-        //                 targets: hand[i],
-        //                 x: 300 + i*120,
-        //                 y: 1000,
-        //                 duration: 200,
-        //                 onComplete: () => {
-        //                     hand.forEach(card => {
-        //                         if (card.first.texture.key === 'cardBackStorm') {
-        //                             this.flipCard(card)
-        //                         }
-        //                         scene.input.setDraggable(card, true)
-        //                     })
-        //                     // if (hand[i].first.texture.key === 'cardBackStorm') {
-        //                     //     this.flipCard(hand[i])
-        //                     // }
-        //                     // scene.input.setDraggable(hand[i], true)
-        //                     tween.remove()
-        //                 }
-        //             })
-        //         } else {
-        //             let tween = scene.tweens.add({
-        //                 targets: hand[i],
-        //                 x: 1620 - i*120,
-        //                 y: 80,
-        //                 duration: 300,
-        //                 onComplete: () => {
-        //                     tween.remove()
-        //                 }
-        //             })
-        //         }
-        //     }
-        // }
+        this.stackHand = player => new Promise(resolve => {
+            let xSpread, ySpread, x, y
+            let hand = scene.UIHandler.areas[player].handArea
+            switch (scene.UIHandler.areas[player].angle) {
+                case 90:
+                    xSpread = 0
+                    ySpread = 100
+                    x = hand.x
+                    y = hand.y - ySpread*hand.cards.length/2
+                    break;
+                case 180:
+                    xSpread = -100
+                    ySpread = 0
+                    x = hand.x - xSpread*hand.cards.length/2
+                    y = hand.y
+                    break;
+                case 270:
+                    xSpread = 0
+                    ySpread = -100
+                    x = hand.x
+                    y = hand.y - ySpread*hand.cards.length/2
+                    break;
+                default:
+                    xSpread = 100
+                    ySpread = 0
+                    x = hand.x - xSpread*hand.cards.length/2
+                    y = hand.y
+                    break;
+            }
+            for (let i=0; i<hand.cards.length; i++) {
+                scene.children.bringToTop(hand.cards[i])
+                let tween = scene.tweens.add({
+                    targets: hand.cards[i],
+                    x: x + xSpread*(i+0.5),
+                    y: y + ySpread*(i+0.5),
+                    // angle: scene.UIHandler.areas[player].angle,
+                    duration: 300,
+                    onComplete: () => {
+                        if (i >= hand.cards.length) {
+                            resolve()
+                        }
+                        tween.remove()
+                    }
+                })
+            }
+
+            // for (let i=0; i<hand.cards.length; i++) {
+            //     scene.children.bringToTop(hand[i])
+                
+            //     let tween = scene.tweens.add({
+            //         targets: card,
+            //         x: scene.UIHandler.areas[owner].handArea.x + xSpread*scene.GameHandler.players[owner].hand.length,
+            //         y: scene.UIHandler.areas[owner].handArea.y + ySpread*scene.GameHandler.players[owner].hand.length,
+            //         angle: scene.UIHandler.areas[owner].angle,
+            //         duration: 300,
+            //         onComplete: () => {
+            //             resolve()
+            //             tween.remove()
+            //         }
+            //     })
+
+            //     if (hand === scene.GameHandler.player.hand) {
+            //         let tween = scene.tweens.add({
+            //             targets: hand[i],
+            //             x: 300 + i*120,
+            //             y: 1000,
+            //             duration: 200,
+            //             onComplete: () => {
+            //                 hand.forEach(card => {
+            //                     if (card.first.texture.key === 'cardBackStorm') {
+            //                         this.flipCard(card)
+            //                     }
+            //                     scene.input.setDraggable(card, true)
+            //                 })
+            //                 // if (hand[i].first.texture.key === 'cardBackStorm') {
+            //                 //     this.flipCard(hand[i])
+            //                 // }
+            //                 // scene.input.setDraggable(hand[i], true)
+            //                 tween.remove()
+            //             }
+            //         })
+            //     } else {
+            //         let tween = scene.tweens.add({
+            //             targets: hand[i],
+            //             x: 1620 - i*120,
+            //             y: 80,
+            //             duration: 300,
+            //             onComplete: () => {
+            //                 tween.remove()
+            //             }
+            //         })
+            //     }
+            // }
+        })
         
         // this.prepareMulligan = hand => {
         //     for (let i=0; i<hand.length; i++) {

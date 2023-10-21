@@ -4,18 +4,21 @@ import UIHandler from "./UIHandler"
 export default class InteractivityHandler {
     constructor(scene) {
         this.UIHandler = new UIHandler(scene)
-        // scene.ready.on('pointerdown', () => {
-        //     scene.socket.emit('ready', scene.socket.id)
-        //     scene.ready.disableInteractive()
-        // })
-
-        // scene.ready.on('pointerover', () => {
-        //     scene.ready.setColor('#ff69b4')
-        // })
-
-        // scene.ready.on('pointerout', () => {
-        //     scene.ready.setColor('#00ffff')
-        // })
+        
+        this.gameTextInteractivity = () => {
+            scene.endTurn.on('pointerover', () => {
+                scene.endTurn.setColor('#ff69b4')
+            })
+            scene.endTurn.on('pointerout', () => {
+                scene.endTurn.setColor('#00ffff')
+            })
+            scene.endTurn.on('pointerup', () => {
+                if (scene.GameHandler.currentTurn === scene.socket.id) {
+                    scene.socket.emit('endTurn', scene.socket.id)
+                    scene.endTurn.disableInteractive()
+                }
+            })
+        }
 
         this.confirmLeaderInteractivity = () => {
             scene.confirmLeader.on('pointerover', () => {
@@ -26,12 +29,12 @@ export default class InteractivityHandler {
             })
             scene.confirmLeader.on('pointerup', () => {
                 if (scene.GameHandler.currentTurn === scene.socket.id && scene.GameHandler.players[scene.socket.id].partyLeader) {
-                    console.log('Picked :', scene.GameHandler.players[scene.socket.id].partyLeader, scene.GameHandler.players)
                     scene.socket.emit('leaderPicked', scene.socket.id, scene.GameHandler.players[scene.socket.id].partyLeader)
                     scene.confirmLeader.disableInteractive()
                 }
             })
         }
+        
         // scene.cardPreview = null
         // scene.fadeBackground = null
         
@@ -197,33 +200,14 @@ export default class InteractivityHandler {
         
         scene.input.on('drop', (pointer, gameObject, dropZone) => {
             if (scene.GameHandler.currentTurn === scene.socket.id && scene.GameHandler.gameState === 'ready') {
-                // gameObject.x = dropZone.x
-                // gameObject.y = dropZone.y
+
+                scene.UIHandler.areas[scene.socket.id].handArea.cards.splice(scene.UIHandler.areas[scene.socket.id].handArea.cards.indexOf(gameObject), 1)
                 scene.CardHandler.moveToHeroArea(gameObject)
+                .then(() => scene.CardHandler.stackHand(scene.socket.id))
                 dropZone.data.list.heroes.push(gameObject)
-                // let tween = scene.tweens.add({
-                //     targets: gameObject,
-                //     scaleX: 0,
-                //     scaleY: 0,
-                //     duration: 200,
-                //     onComplete: () => {
-                //         this.CardHandler.summon(dropZone, gameObject)
-                //         this.CardHandler.stackHand(scene.GameHandler.player.hand)
-                //         gameObject.first.play(gameObject.getData('boardIdleSpritesheet'))
-                //         tween.remove()
-                //     }
-                // })
 
                 scene.input.setDraggable(gameObject, false)
                 scene.socket.emit('heroPlayed', gameObject.data.values.name, scene.socket.id)
-                // console.log(dropZone)
-
-                
-                // Phaser.Actions.SetX(scene.DeckHandler.playerHand, )
-                // let test = scene.add.sprite(960, 400).setScale(4).play('archerIdle')
-                // scene.socket.emit('cardPlayed', gameObject.data.values.name, scene.socket.id)
-
-                
 
             } else {
                 gameObject.x = gameObject.input.dragStartX

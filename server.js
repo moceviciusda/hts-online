@@ -10,7 +10,7 @@ const io = require('socket.io')(http, {
 })
 
 const shuffle = require('shuffle-array')
-let numberOfPlayers = 4
+let numberOfPlayers = 2
 let gameTurn = 0
 let players = {}
 let spectators = []
