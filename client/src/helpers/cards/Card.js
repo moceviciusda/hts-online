@@ -12,7 +12,8 @@ export default class Card {
                 sprite: this.cardSprite,
                 type: this.type,
                 backSprite: 'htsCardBack',
-                location: 'deck'
+                location: 'deck',
+                playing: false
             })
             if (this.type === 'hero') {
                 card.setData({
@@ -20,6 +21,7 @@ export default class Card {
                     item: null
                 })
             }
+            
 
             if (owner === scene.socket.id) {
                 scene.input.setDraggable(card)

@@ -1,5 +1,6 @@
 import CardBack from "./cards/CardBack"
 import MonsterCardBack from "./cards/monsters/MonsterCardBack"
+import Challenge from "./cards/Challenge"
 
 import TheCharismaticSong from "./cards/party_leaders/TheCharismaticSong"
 import TheCloakedSage from "./cards/party_leaders/TheCloakedSage"
@@ -24,12 +25,54 @@ import Terratuga from "./cards/monsters/Terratuga"
 import TitanWyvern from "./cards/monsters/TitanWyvern"
 import WarwornOwlbear from "./cards/monsters/WarwornOwlbear"
 
+import BadAxe from "./cards/heroes/BadAxe"
 import BearClaw from "./cards/heroes/BearClaw"
-import Bullseye from "./cards/heroes/Bullseye"
-import BunBun from "./cards/heroes/BunBun"
-import CalmingVoice from "./cards/heroes/CalmingVoice"
-import SilentShadow from "./cards/heroes/SilentShadow"
+import BearyWise from "./cards/heroes/BearyWise"
+import FuryKnuckle from "./cards/heroes/FuryKnuckle"
+import HeavyBear from "./cards/heroes/HeavyBear"
+import PanChucks from "./cards/heroes/PanChucks"
+import QiBear from "./cards/heroes/QiBear"
+import ToughTeddy from "./cards/heroes/ToughTeddy"
+import DodgyDealer from "./cards/heroes/DodgyDealer"
+import FuzzyCheeks from "./cards/heroes/FuzzyCheeks"
+import GreedyCheeks from "./cards/heroes/GreedyCheeks"
+import LuckyBucky from "./cards/heroes/LuckyBucky"
+import MellowDee from "./cards/heroes/MellowDee"
+import NappingNibbles from "./cards/heroes/NappingNibbles"
+import Peanut from "./cards/heroes/Peanut"
 import TipsyTootie from "./cards/heroes/TipsyTootie"
+import CalmingVoice from "./cards/heroes/CalmingVoice"
+import GuidingLight from "./cards/heroes/GuidingLight"
+import HolyCurselifter from "./cards/heroes/HolyCurselifter"
+import IronResolve from "./cards/heroes/IronResolve"
+import MightyBlade from "./cards/heroes/MightyBlade"
+import RadiantHorn from "./cards/heroes/RadiantHorn"
+import VibrantGlow from "./cards/heroes/VibrantGlow"
+import WiseShield from "./cards/heroes/WiseShield"
+import Bullseye from "./cards/heroes/Bullseye"
+import Hook from "./cards/heroes/Hook"
+import LookieRookie from "./cards/heroes/LookieRookie"
+import QuickDraw from "./cards/heroes/QuickDraw"
+import SeriousGrey from "./cards/heroes/SeriousGrey"
+import SharpFox from "./cards/heroes/SharpFox"
+import Wildshot from "./cards/heroes/Wildshot"
+import WilyRed from "./cards/heroes/WilyRed"
+import KitNapper from "./cards/heroes/KitNapper"
+import Meowzio from "./cards/heroes/Meowzio"
+import PlunderingPuma from "./cards/heroes/PlunderingPuma"
+import Shurikitty from "./cards/heroes/Shurikitty"
+import SilentShadow from "./cards/heroes/SilentShadow"
+import SlipperyPaws from "./cards/heroes/SlipperyPaws"
+import SlyPickings from "./cards/heroes/SlyPickings"
+import SmoothMimimeow from "./cards/heroes/SmoothMimimeow"
+import BunBun from "./cards/heroes/BunBun"
+import Buttons from "./cards/heroes/Buttons"
+import Fluffy from "./cards/heroes/Fluffy"
+import Hopper from "./cards/heroes/Hopper"
+import Snowball from "./cards/heroes/Snowball"
+import Spooky from "./cards/heroes/Spooky"
+import Whiskers from "./cards/heroes/Whiskers"
+import Wiggles from "./cards/heroes/Wiggles"
 
 import BardMask from "./cards/items/BardMask"
 import DecoyDoll from "./cards/items/DecoyDoll"
@@ -46,13 +89,6 @@ import SealingKey from "./cards/cursed_items/SealingKey"
 import SuspiciouslyShinyCoin from "./cards/cursed_items/SuspiciouslyShinyCoin"
 
 
-
-// import DarkArcher from "./cards/DarkArcher";
-// import DarkRogue from "./cards/DarkRogue";
-// import CardHandler from "./CardHandler";
-
-
-
 export default class DeckHandler {
     constructor(scene){
 
@@ -62,6 +98,7 @@ export default class DeckHandler {
             let cards = {
                 cardBack: new CardBack(scene),
                 monsterCardBack: new MonsterCardBack(scene),
+                challenge: new Challenge(scene),
 
                 theCharismaticSong: new TheCharismaticSong(scene),
                 theCloakedSage: new TheCloakedSage(scene),
@@ -86,12 +123,54 @@ export default class DeckHandler {
                 titanWyvern: new TitanWyvern(scene),
                 warwornOwlbear: new WarwornOwlbear(scene),
 
+                badAxe: new BadAxe(scene),
                 bearClaw: new BearClaw(scene),
-                bullseye: new Bullseye(scene),
-                bunBun: new BunBun(scene),
-                calmingVoice: new CalmingVoice(scene),
-                silentShadow: new SilentShadow(scene),
+                bearyWise: new BearyWise(scene),
+                furyKnuckle: new FuryKnuckle(scene),
+                heavyBear: new HeavyBear(scene),
+                panChucks: new PanChucks(scene),
+                qiBear: new QiBear(scene),
+                toughTeddy: new ToughTeddy(scene),
+                dodgyDealer: new DodgyDealer(scene),
+                fuzzyCheeks: new FuzzyCheeks(scene),
+                greedyCheeks: new GreedyCheeks(scene),
+                luckyBucky: new LuckyBucky(scene),
+                mellowDee: new MellowDee(scene),
+                nappingNibbles: new NappingNibbles(scene),
+                peanut: new Peanut(scene),
                 tipsyTootie: new TipsyTootie(scene),
+                calmingVoice: new CalmingVoice(scene),
+                guidingLight: new GuidingLight(scene),
+                holyCurselifter: new HolyCurselifter(scene),
+                ironResolve: new IronResolve(scene),
+                mightyBlade: new MightyBlade(scene),
+                radiantHorn: new RadiantHorn(scene),
+                vibrantGlow: new VibrantGlow(scene),
+                wiseShield: new WiseShield(scene),
+                bullseye: new Bullseye(scene),
+                hook: new Hook(scene),
+                lookieRookie: new LookieRookie(scene),
+                quickDraw: new QuickDraw(scene),
+                seriousGrey: new SeriousGrey(scene),
+                sharpFox: new SharpFox(scene),
+                wildshot: new Wildshot(scene),
+                wilyRed: new WilyRed(scene),
+                kitNapper: new KitNapper(scene),
+                meowzio: new Meowzio(scene),
+                plunderingPuma: new PlunderingPuma(scene),
+                shurikitty: new Shurikitty(scene),
+                silentShadow: new SilentShadow(scene),
+                slipperyPaws: new SlipperyPaws(scene),
+                slyPickings: new SlyPickings(scene),
+                smoothMimimeow: new SmoothMimimeow(scene),
+                bunBun: new BunBun(scene),
+                buttons: new Buttons(scene),
+                fluffy: new Fluffy(scene),
+                hopper: new Hopper(scene),
+                snowball: new Snowball(scene),
+                spooky: new Spooky(scene),
+                whiskers: new Whiskers(scene),
+                wiggles: new Wiggles(scene),
 
                 bardMask: new BardMask(scene),
                 decoyDoll: new DecoyDoll(scene),
@@ -109,30 +188,9 @@ export default class DeckHandler {
             }
             let newCard = cards[name]
             console.log(newCard)
-            
+
             return newCard.render(x, y, owner)
         }
-
-        // this.dealDeck = (deckList, owner) => {
-        //     Phaser.Utils.Array.Shuffle(deckList)
-        //     deckList.forEach(name => {
-        //         let card = scene.DeckHandler.dealCard(name, owner)
-        //         owner.deck.push(card)
-        //         console.log(card)
-        //         this.CardHandler.flipCard(card)
-        //         scene.input.setDraggable(card, false)
-        //     })
-        // }
-
-        // this.returnToDeck = (card, owner) => {
-        //     console.log(`${card.getData('name')} -> Returning to deck`)
-        //     this.CardHandler.removeFromBoard(card)
-        //     let newCard = this.dealCard(card.getData('name'), owner)
-        //     card.destroy()
-        //     owner.deck.unshift(newCard)
-        //     this.CardHandler.flipCard(newCard)
-        //     scene.input.setDraggable(newCard, false)
-        // }
         
         this.drawCard = (name, owner) => {
             let card = scene.DeckHandler.dealCard(scene.deckArea.x, scene.deckArea.y, name, owner).setData('location', 'hand')
@@ -145,41 +203,7 @@ export default class DeckHandler {
             let monster = scene.DeckHandler.dealCard(scene.monsterArea.x+344-85, scene.monsterArea.y, name, null)
             scene.CardHandler.moveToMonsterArea(monster)
             scene.GameHandler.monsters.push(monster)
-        }        // this.drawCards = (deckOwner, handOwner, amount) => {
-        //     for (let i = 0; i < amount; i++) {
-        //         if (deckOwner.deck.length > 0) {
-        //             let card = deckOwner.deck.pop()
-        //             handOwner.hand.push(card)
-        //             console.log(handOwner + 'card draw')
-        //             if (handOwner.hand.length > 10) {
-        //                 // this.CardHandler.stackHand(hand)
-        //                 this.CardHandler.moveToGraveyard(handOwner.hand, card, handOwner.graveyard)
-        //             }
-        //         } else {
-        //             // stuff that happens when out of cards
-        //         }
-        //     } 
-        // }
-
-        // this.confirmMulligan = (owner) => {
-        //     let mullIndexArray = []
-        //     for (let i = 0; i < owner.hand.length; i++) {
-        //         owner.hand[i].setScale(2, 2)
-        //         if (owner.hand[i].data.list.mull) {
-        //             owner.hand[i].getFirst().setTint()
-        //             // this.CardHandler.flipCard(hand[i])
-        //             this.CardHandler.moveToDeck(owner.hand[i])
-        //             mullIndexArray.push(i)
-        //         }
-        //     }
-            
-        //     this.drawCards(owner, owner, mullIndexArray.length)
-
-        //     while(mullIndexArray.length) {
-        //         owner.deck.unshift(owner.hand.splice(mullIndexArray.pop(), 1))
-        //     }
-        //     this.CardHandler.stackHand(owner.hand)
-        // }
-
+        }        
+        
     }
 }

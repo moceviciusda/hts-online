@@ -19,6 +19,35 @@ export default class InteractivityHandler {
                     scene.socket.emit('endTurn', scene.socket.id)
                 }
             })
+
+            scene.drawCard.on('pointerover', () => {
+                scene.drawCard.setColor('#ff69b4')
+            })
+            scene.drawCard.on('pointerout', () => {
+                scene.drawCard.setColor('#00ffff')
+            })
+            scene.drawCard.on('pointerup', () => {
+                if (scene.GameHandler.currentTurn === scene.socket.id) {
+                    // scene.drawCard.disableInteractive()
+                    scene.socket.emit('drawCard', scene.socket.id)
+                }
+            })
+
+            scene.rollDice.on('pointerover', () => {
+                scene.rollDice.setColor('#ff69b4')
+            })
+            scene.rollDice.on('pointerout', () => {
+                scene.rollDice.setColor('#00ffff')
+            })
+            scene.rollDice.on('pointerup', () => {
+                if (scene.GameHandler.currentTurn === scene.socket.id) {
+                    // scene.UIHandler.showDice()
+                    scene.socket.emit('diceRoll', scene.socket.id)
+
+                    // scene.drawCard.disableInteractive()
+                    // scene.socket.emit('drawCard', scene.socket.id)
+                }
+            })
         }
 
         this.confirmLeaderInteractivity = () => {
@@ -118,12 +147,14 @@ export default class InteractivityHandler {
             this.highlightArray = []
             if (scene.GameHandler.currentTurn === scene.socket.id && scene.GameHandler.gameState === 'ready') {
                 scene.fadeBackground.setVisible(true)
+                scene.children.bringToTop(scene.fadeBackground)
+                scene.children.bringToTop(gameObject)
                 if (gameObject.getData('type') === 'hero') {
-                    this.highlightArray.push(this.UIHandler.zoneHandler.renderOutline(scene.playerHeroArea, 0x00ffff))
+                    this.highlightArray.push(this.UIHandler.ZoneHandler.renderOutline(scene.playerHeroArea, 0x00ffff))
                 } else if (gameObject.getData('type') === 'item') {
                     scene.UIHandler.heroesOnBoard().forEach(hero => {
                         if (!hero.getData('item')) {
-                            this.highlightArray.push(this.UIHandler.zoneHandler.renderOutline(hero, 0x00ffff))
+                            this.highlightArray.push(this.UIHandler.ZoneHandler.renderOutline(hero, 0x00ffff))
                             scene.children.bringToTop(hero)
                             // scene.CardHandler.highlight(hero)
                         }
@@ -152,22 +183,18 @@ export default class InteractivityHandler {
             if (scene.GameHandler.currentTurn === scene.socket.id && scene.GameHandler.gameState === 'ready') {              
                 if (gameObject.getData('type') === 'hero' && dropZone === scene.playerHeroArea) {
                     dropped = true
-                    scene.CardHandler.moveToHeroArea(gameObject)
-                    .then(() => scene.CardHandler.stackHand(scene.socket.id))
-                    dropZone.data.list.heroes.push(gameObject)
-                    scene.socket.emit('heroPlayed', gameObject.getData('name'), scene.socket.id)
+                    scene.socket.emit('cardDropped', gameObject.getData('name'), null, scene.socket.id)
+                    // scene.socket.emit('heroPlayed', gameObject.getData('name'), scene.socket.id)
 
                 } else if (gameObject.getData('type') === 'item' && dropZone !== scene.playerHeroArea && !dropZone.getData('item')) {
                     dropped = true
-                    dropZone.setData('item', gameObject)
-                    scene.CardHandler.equipItem(gameObject, dropZone)
-                    .then(() => scene.CardHandler.stackHand(scene.socket.id))
-                    scene.socket.emit('itemEquiped', gameObject.getData('name'), dropZone.getData('name'), scene.socket.id)
+                    scene.socket.emit('cardDropped', gameObject.getData('name'), dropZone.getData('name'), scene.socket.id)
+                    // scene.socket.emit('itemEquiped', gameObject.getData('name'), dropZone.getData('name'), scene.socket.id)
                 }
             } 
 
             if (dropped) {
-                scene.UIHandler.areas[scene.socket.id].handArea.cards.splice(scene.UIHandler.areas[scene.socket.id].handArea.cards.indexOf(gameObject), 1)
+                gameObject.setData('playing', true)
                 scene.input.setDraggable(gameObject, false)
             } else {
                 gameObject.x = gameObject.input.dragStartX

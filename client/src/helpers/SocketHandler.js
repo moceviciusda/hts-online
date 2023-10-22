@@ -89,30 +89,54 @@ export default class SocketHandler {
             scene.DeckHandler.drawCard(card, player)
         })
 
+        
+
         scene.socket.on('heroPlayed', (name, player) => {
-            if (player !== scene.socket.id) {
-                let card = scene.UIHandler.areas[player].handArea.cards.find(card => card.getData('name') === name)
-                scene.UIHandler.areas[player].handArea.cards.splice(scene.UIHandler.areas[player].handArea.cards.indexOf(card), 1)
-
-                scene.CardHandler.moveToHeroArea(card)
-                .then(() => scene.CardHandler.flipCard(card))
-                .then(() => scene.CardHandler.stackHand(player))
-
-                scene.UIHandler.areas[player].heroArea.data.list.heroes.push(card)
+            let handArea = scene.UIHandler.areas[player].handArea
+            let card
+            if (player === scene.socket.id) {
+                card = handArea.cards.find(card => card.getData('name') === name && card.getData('playing'))
+            } else {
+                card = handArea.cards.find(card => card.getData('name') === name)
             }
+            handArea.cards.splice(handArea.cards.indexOf(card), 1)
+            scene.UIHandler.areas[player].heroArea.data.list.heroes.push(card)
+            card.setData('playing', false)
+
+            scene.CardHandler.moveToHeroArea(card)
+            .then(() => {
+                if (player !== scene.socket.id) {
+                    scene.CardHandler.flipCard(card)
+                }
+                scene.CardHandler.stackHand(player)
+                scene.CardHandler.stackHeroes(player)
+            })
         })
 
         scene.socket.on('itemEquiped', (itemName, heroName, player) => {
-            if (player !== scene.socket.id) {
-                let item = scene.UIHandler.areas[player].handArea.cards.find(card => card.getData('name') === itemName)
-                scene.UIHandler.areas[player].handArea.cards.splice(scene.UIHandler.areas[player].handArea.cards.indexOf(item), 1)
-
-                let hero = scene.UIHandler.heroesOnBoard().find(card => card.getData('name') === heroName)
-                scene.CardHandler.equipItem(item, hero)
-                .then(() => scene.CardHandler.flipCard(item))
-                .then(() => scene.CardHandler.stackHand(player))
+            let handArea = scene.UIHandler.areas[player].handArea
+            let item
+            if (player === scene.socket.id) {
+                item = handArea.cards.find(card => card.getData('name') === itemName && card.getData('playing'))
+            } else {
+                item = handArea.cards.find(card => card.getData('name') === itemName)
             }
+            handArea.cards.splice(handArea.cards.indexOf(item), 1)
+            item.setData('playing', false)
+
+            let hero = scene.UIHandler.heroesOnBoard().find(card => card.getData('name') === heroName)
+            scene.CardHandler.equipItem(item, hero)
+            .then(() => {
+                if (player !== scene.socket.id) {
+                    scene.CardHandler.flipCard(item)
+                }
+                scene.CardHandler.stackHand(player)
+            })
         })
 
+        scene.socket.on('diceRoll', (result1, result2, player) => {
+            scene.UIHandler.rollDice(result1, result2)
+            .then(result => console.log(player, 'Rolled:', result, '(', result1, '+', result2, ')'))
+        })
     }
 }

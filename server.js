@@ -17,10 +17,17 @@ let spectators = []
 let partyLeaders = ['theCharismaticSong', 'theCloakedSage', 'theDivineArrow', 'theFistOfReason', 'theProtectingHorn', 'theShadowClaw']
 let monsterDeck = ['abyssQueen', 'anuranCauldron', 'arcticAries', 'bloodwing', 'corruptedSabretooth', 'crownedSerpent', 'darkDragonWing', 'dracos', 'malamammoth', 'megaSlime', 'orthus', 'rexMajor', 'terratuga', 'titanWyvern', 'warwornOwlbear']
 let monsters = []
-let deck = ['bearClaw', 'bullseye', 'bunBun', 'calmingVoice', 'silentShadow', 'tipsyTootie','bearClaw', 'bullseye', 'bunBun', 'calmingVoice', 'silentShadow', 'tipsyTootie','bearClaw', 'bullseye', 'bunBun', 'calmingVoice', 'silentShadow', 'tipsyTootie','bearClaw', 'bullseye', 'bunBun', 'calmingVoice', 'silentShadow', 'tipsyTootie', 'bardMask', 'decoyDoll', 'fighterMask', 'guardianMask', 'particularlyRustyCoin', 'particularlyRustyCoin', 'rangerMask', 'reallyBigRing', 'reallyBigRing', 'thiefMask', 'wizardMask', 'curseOfTheSnakesEyes', 'curseOfTheSnakesEyes', 'sealingKey', 'suspiciouslyShinyCoin']
+let baseHeroes = ['badAxe', 'bearClaw', 'bearyWise', 'furyKnuckle', 'heavyBear', 'panChucks', 'qiBear', 'toughTeddy', 'dodgyDealer', 'fuzzyCheeks', 'greedyCheeks', 'luckyBucky', 'mellowDee', 'nappingNibbles', 'peanut', 'tipsyTootie', 'calmingVoice', 'guidingLight', 'holyCurselifter', 'ironResolve', 'mightyBlade', 'radiantHorn', 'vibrantGlow', 'wiseShield', 'bullseye', 'hook', 'lookieRookie', 'quickDraw', 'seriousGrey', 'sharpFox', 'wildshot', 'wilyRed', 'kitNapper', 'meowzio', 'plunderingPuma', 'shurikitty', 'silentShadow', 'slipperyPaws', 'slyPickings', 'smoothMimimeow', 'bunBun', 'buttons', 'fluffy', 'hopper', 'snowball', 'spooky', 'whiskers', 'wiggles']
+let baseItems = ['bardMask', 'decoyDoll', 'fighterMask', 'guardianMask', 'particularlyRustyCoin', 'particularlyRustyCoin', 'rangerMask', 'reallyBigRing', 'reallyBigRing', 'thiefMask', 'wizardMask', 'curseOfTheSnakesEyes', 'curseOfTheSnakesEyes', 'sealingKey', 'suspiciouslyShinyCoin']
+let challenges = ['challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge']
+let deck = [].concat(baseHeroes, baseItems, challenges)
 let gameState = 'initializing'
 let currentTurn
 let leaderMovedCount = 0
+
+let randomDice = (min, max) => {
+    return Math.floor(Math.random() * (max - min + 1) + min)
+  }
 
 let alert = alert => {
     io.emit('alert', alert)
@@ -43,6 +50,7 @@ let nextTurn = () => {
 let drawCard = player => {
     let card = deck.shift()
     players[player].hand.push(card)
+    console.log(player, 'drawn:', card)
     io.emit('drawCard', card, player)
     io.emit('updatePlayers', players)
     io.emit('updateDeck', deck)
@@ -121,6 +129,17 @@ io.on('connection', socket => {
         }
     })
 
+    socket.on('drawCard', socketId => {
+        drawCard(socketId)
+    })
+
+    socket.on('cardDropped', (name, target, socketId) => {
+        console.log(socketId, 'attempting to play:', name, 'on', target)
+        players[socketId].hand.splice(players[socketId].hand.indexOf(name), 1)
+        // players[socketId].heroes.push(name)
+        io.emit('itemEquiped', name, hero, socketId)
+    })
+
     socket.on('heroPlayed', (name, socketId) => {
         console.log(socketId, 'played:', name)
         players[socketId].hand.splice(players[socketId].hand.indexOf(name), 1)
@@ -133,6 +152,13 @@ io.on('connection', socket => {
         players[socketId].hand.splice(players[socketId].hand.indexOf(name), 1)
         // players[socketId].heroes.push(name)
         io.emit('itemEquiped', name, hero, socketId)
+    })
+
+    socket.on('diceRoll', socketId => {
+        let result1 = randomDice(1, 6)
+        let result2 = randomDice(1, 6)
+        console.log(socketId, 'Rolled:', result1+result2, '(', result1, '+', result2, ')')
+        io.emit('diceRoll', result1, result2, socketId)
     })
 })
 

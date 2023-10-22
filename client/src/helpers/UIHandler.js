@@ -1,8 +1,10 @@
+import DiceHandler from "./DiceHandler"
 import ZoneHandler from "./ZoneHandler"
 
 export default class UIHandler {
     constructor(scene) {
-        this.zoneHandler = new ZoneHandler(scene)
+        this.ZoneHandler = new ZoneHandler(scene)
+        this.DiceHandler = new DiceHandler(scene)
 
         this.areas = {}
         this.partyLeadersDealt = false
@@ -15,8 +17,8 @@ export default class UIHandler {
 
         this.buildPlayerAreas = () => {
             scene.playerHandArea = {x: scene.scale.width/2, y: scene.scale.height, cards: []}
-            scene.playerHeroArea = this.zoneHandler.renderZone(scene.scale.width/2, 800, 1078, 216).setData('heroes', [])
-            this.zoneHandler.renderOutline(scene.playerHeroArea, 0xff69b4)
+            scene.playerHeroArea = this.ZoneHandler.renderZone(scene.scale.width/2, 800, 1078, 216).setData('heroes', [])
+            this.ZoneHandler.renderOutline(scene.playerHeroArea, 0xff69b4)
             scene.playerLeaderArea = scene.add.rectangle(702, 1000, 172, 300).setStrokeStyle(4, 0xff69b4)
             scene.playerSlayArea = scene.add.rectangle(1046, 1000, 516, 300).setStrokeStyle(4, 0xff69b4)
         }
@@ -79,6 +81,13 @@ export default class UIHandler {
         this.buildGameText = () => {
             scene.endTurn = scene.add.text(1420, 950, 'End Turn')
             scene.endTurn.setFontSize(32).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5)
+            
+            scene.drawCard = scene.add.text(1420, 1000, 'Draw')
+            scene.drawCard.setFontSize(32).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5).setInteractive()
+
+            scene.rollDice = scene.add.text(1420, 1050, 'Roll Dice')
+            scene.rollDice.setFontSize(32).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5).setInteractive()
+
             scene.InteractivityHandler.gameTextInteractivity()
         }
         
@@ -154,12 +163,38 @@ export default class UIHandler {
             }
         }
 
+        this.buildDice = () => {
+            scene.dice1 = this.DiceHandler.createDice(scene.scale.width/2 - 100, scene.scale.height/2 + 250)
+            scene.dice2 = this.DiceHandler.createDice(scene.scale.width/2 + 100, scene.scale.height/2 + 250)
+            // this.hideDice()
+        }
+        
+        this.hideDice = () => {
+            scene.dice1.setVisible(false)
+            scene.dice2.setVisible(false)
+        }
+
+        this.showDice = () => {
+            scene.dice1.setVisible(true)
+            scene.dice2.setVisible(true)
+            scene.children.bringToTop(scene.dice1)
+            scene.children.bringToTop(scene.dice2)
+        }
+
+        this.rollDice = (result1, result2) => new Promise(resolve => {
+            scene.dice1(result1)
+            .then(() => scene.dice2(result2))
+            .then(() => resolve(result1 + result2))
+        })
+
         this.buildUI = () => {
             this.buildCommonAreas()
             this.buildPlayerAreas()
             this.buildOpponentAreas()
             scene.fadeBackground = scene.add.graphics()
             scene.fadeBackground.fillStyle(0x000000, 0.9).fillRect(0, 0, 1920, 1080)
+            this.buildDice()
+            // this.hideDice()
             // this.buildGameText()
         }
     }
