@@ -65,6 +65,8 @@ export default class InteractivityHandler {
             })
         }
 
+        
+        
         scene.input.on('pointerup', (event, gameObjects) => {
             console.log(scene.GameHandler.currentTurn, scene.socket.id)
             console.log(gameObjects[0])

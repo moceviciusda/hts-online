@@ -113,9 +113,9 @@ export default class UIHandler {
                 scene.leaderSelectionText.destroy()
                 scene.confirmLeader.destroy()
             }
-            scene.leaderSelectionText = scene.add.text(960, 150, 'Another Player is choosing party leader')
+            scene.leaderSelectionText = scene.add.text(scene.scale.width/2, 150, 'Another Player is choosing party leader')
             scene.leaderSelectionText.setFontSize(48).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5)
-            scene.confirmLeader = scene.add.text(960, 900, 'Confirm Leader')
+            scene.confirmLeader = scene.add.text(scene.scale.width/2, 900, 'Confirm Leader')
             scene.confirmLeader.setFontSize(48).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5)
 
             if (scene.GameHandler.currentTurn === scene.socket.id) {
@@ -125,7 +125,7 @@ export default class UIHandler {
         }
 
         this.alert = message => {
-            scene.alertText = scene.add.text(960, 540, message)
+            scene.alertText = scene.add.text(scene.scale.width/2, scene.scale.height/2, message)
             scene.alertText.setFontSize(64).setFontFamily('Trebuchet MS').setColor('#00ffff').setDepth(10).setOrigin(0.5, 0.5).setAlpha(0)
             let appear = scene.tweens.add({
                 targets: scene.alertText,
@@ -163,6 +163,33 @@ export default class UIHandler {
             }
         }
 
+        this.buildChallengeView = (droppedCard, player) => {
+            let handArea = scene.UIHandler.areas[player].handArea
+            let card = handArea.cards.find(card => card.getData('name') === droppedCard)
+            scene.fadeBackground.setVisible(true)
+            scene.children.bringToTop(scene.fadeBackground)
+
+            scene.challengeText = scene.add.text(scene.scale.width/2, 150, '')
+            .setFontSize(48).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5)
+            scene.dontChallengeText = scene.add.text(scene.scale.width/2, 900, '')
+            .setFontSize(48).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5).setScale(0)
+            if (player !== scene.socket.id && scene.UIHandler.areas[scene.socket.id].handArea.cards.find((card) => card.getData('type') === 'challenge')) {
+                scene.challengeText.setText(`Would you like to challenge ${player} ?`)
+                scene.dontChallengeText.setText("Don't Challenge").setScale(1).setInteractive()
+
+                scene.UIHandler.areas[scene.socket.id].handArea.cards.forEach(card => {
+                    if (card.getData('type') === 'challenge') {
+                        scene.children.bringToTop(card)
+                        scene.CardHandler.highlight(card)
+                    }
+                })
+            } else {
+                scene.challengeText.setText('Waiting for Challengers')
+            }
+
+            scene.droppedCard = scene.add.image(scene.scale.width/2, scene.scale.height/2, card.getData('sprite'))
+        }
+
         this.buildDice = () => {
             scene.dice1 = this.DiceHandler.createDice(scene.scale.width/2 - 100, scene.scale.height/2 + 250)
             scene.dice2 = this.DiceHandler.createDice(scene.scale.width/2 + 100, scene.scale.height/2 + 250)
@@ -193,7 +220,7 @@ export default class UIHandler {
             this.buildOpponentAreas()
             scene.fadeBackground = scene.add.graphics()
             scene.fadeBackground.fillStyle(0x000000, 0.9).fillRect(0, 0, 1920, 1080)
-            this.buildDice()
+            // this.buildDice()
             // this.hideDice()
             // this.buildGameText()
         }

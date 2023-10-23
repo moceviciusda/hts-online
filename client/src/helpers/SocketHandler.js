@@ -89,7 +89,9 @@ export default class SocketHandler {
             scene.DeckHandler.drawCard(card, player)
         })
 
-        
+        scene.socket.on('cardDropped', (name, target, player) => {
+            scene.UIHandler.buildChallengeView(name, player)
+        })
 
         scene.socket.on('heroPlayed', (name, player) => {
             let handArea = scene.UIHandler.areas[player].handArea

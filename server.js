@@ -12,6 +12,7 @@ const io = require('socket.io')(http, {
 const shuffle = require('shuffle-array')
 let numberOfPlayers = 2
 let gameTurn = 1
+let challengeCheck = 0
 let players = {}
 let spectators = []
 let partyLeaders = ['theCharismaticSong', 'theCloakedSage', 'theDivineArrow', 'theFistOfReason', 'theProtectingHorn', 'theShadowClaw']
@@ -137,7 +138,7 @@ io.on('connection', socket => {
         console.log(socketId, 'attempting to play:', name, 'on', target)
         players[socketId].hand.splice(players[socketId].hand.indexOf(name), 1)
         // players[socketId].heroes.push(name)
-        io.emit('itemEquiped', name, hero, socketId)
+        io.emit('cardDropped', name, target, socketId)
     })
 
     socket.on('heroPlayed', (name, socketId) => {
