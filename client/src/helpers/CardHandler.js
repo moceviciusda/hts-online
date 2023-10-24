@@ -54,6 +54,7 @@ export default class CardHandler {
                 x: scene.UIHandler.areas[owner].handArea.x + xSpread*scene.GameHandler.players[owner].hand.length/2,
                 y: scene.UIHandler.areas[owner].handArea.y + ySpread*scene.GameHandler.players[owner].hand.length/2,
                 angle: scene.UIHandler.areas[owner].angle,
+                scale: 0.5,
                 duration: 300,
                 onComplete: () => {
                     card.setData('location', 'hand')
@@ -86,9 +87,8 @@ export default class CardHandler {
                 targets: card,
                 x: heroArea.x + xSpread*heroArea.getData('heroes').length/2,
                 y: heroArea.y + ySpread*heroArea.getData('heroes').length/2,
-                // x: scene.UIHandler.areas[card.getData('owner')].heroArea.x - scene.UIHandler.areas[card.getData('owner')].heroArea.width/2 + xPlus + xSpread*scene.UIHandler.areas[card.getData('owner')].heroArea.getData('heroes').length,
-                // y: scene.UIHandler.areas[card.getData('owner')].heroArea.y - scene.UIHandler.areas[card.getData('owner')].heroArea.height/2 + yPlus +  ySpread*scene.UIHandler.areas[card.getData('owner')].heroArea.getData('heroes').length,
                 angle: scene.UIHandler.areas[card.getData('owner')].angle,
+                scale: 0.5,
                 duration: 200,
                 onComplete: () => {
                     card.setData('location', 'board')
@@ -119,18 +119,48 @@ export default class CardHandler {
                     yPlus = 40
                     break
             }
-            scene.children.bringToTop(hero)
+            
             let tween = scene.tweens.add({
                 targets: item,
                 x: hero.x + xPlus,
                 y: hero.y + yPlus,
                 angle: hero.angle,
+                scale: 0.5,
                 duration: 300,
                 onComplete: () => {
                     item.setData('location', 'board')
                     hero.setData('item', item)
+                    scene.children.bringToTop(hero)
                     resolve()
                     tween.remove()
+                }
+            })
+        })
+
+        this.moveToChallenge = (challengeCard, challengeTarget) => new Promise(resolve => {
+            scene.children.bringToTop(challengeCard)
+            let challengeTween = scene.tweens.add({
+                targets: challengeCard,
+                x: scene.scale.width/2 + challengeTarget.displayWidth,
+                y: scene.scale.height/2,
+                angle: challengeTarget.angle,
+                scale: 1,
+                duration: 500,
+                onComplete: () => {
+                    challengeCard.setData('location', 'board')
+                    resolve()
+                    challengeTween.remove()
+                }
+            })
+            let targetTween = scene.tweens.add({
+                targets: challengeTarget,
+                x: scene.scale.width/2 - challengeTarget.displayWidth,
+                y: scene.scale.height/2,
+                duration: 200,
+                onComplete: () => {
+                    challengeTarget.setData('location', 'board')
+                    resolve()
+                    targetTween.remove()
                 }
             })
         })
@@ -208,7 +238,7 @@ export default class CardHandler {
                     break;
             }
             for (let i=0; i<hand.cards.length; i++) {
-                scene.children.bringToTop(hand.cards[i])
+                // scene.children.bringToTop(hand.cards[i])
                 let tween = scene.tweens.add({
                     targets: hand.cards[i],
                     x: x + xSpread*(i+0.5),

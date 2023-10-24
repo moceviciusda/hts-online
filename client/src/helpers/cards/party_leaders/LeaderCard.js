@@ -8,7 +8,7 @@ export default class LeaderCard {
                 'name': this.name,
                 'owner': owner,
                 'sprite': this.cardSprite,
-                'type': 'partyLeaderCard',
+                'type': 'partyLeader',
                 'available': true
                 // 'backSprite': 'htsCardBack'
             })

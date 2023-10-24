@@ -11,8 +11,8 @@ const io = require('socket.io')(http, {
 
 const shuffle = require('shuffle-array')
 let numberOfPlayers = 2
+let reactCount = 0
 let gameTurn = 1
-let challengeCheck = 0
 let players = {}
 let spectators = []
 let partyLeaders = ['theCharismaticSong', 'theCloakedSage', 'theDivineArrow', 'theFistOfReason', 'theProtectingHorn', 'theShadowClaw']
@@ -26,7 +26,7 @@ let gameState = 'initializing'
 let currentTurn
 let leaderMovedCount = 0
 
-let randomDice = (min, max) => {
+let randomInt = (min, max) => {
     return Math.floor(Math.random() * (max - min + 1) + min)
   }
 
@@ -45,7 +45,7 @@ let nextTurn = () => {
     currentTurn = Object.keys(players)[gameTurn-1]
     console.log('Current turn:', currentTurn)
     io.emit('setCurrentTurn', currentTurn)
-    alert(`Player ${gameTurn}'s Turn`)
+    if (gameState === 'ready') alert(`Player ${gameTurn}'s Turn`)
 }
 
 let drawCard = player => {
@@ -82,9 +82,6 @@ io.on('connection', socket => {
             monsters: [],
             heroes: []
         }
-        if (Object.keys(players).length < 2) {
-            io.emit('setCurrentTurn', socket.id)
-        }
     } else {
         spectators.push(socket.id)
     }
@@ -100,7 +97,8 @@ io.on('connection', socket => {
         io.emit('updateDeck', deck)
         console.log(players)
         if (Object.keys(players).length < numberOfPlayers) return
-
+        gameTurn = randomInt(1, numberOfPlayers)
+        nextTurn()
         io.emit('updatePlayers', players)
         setGameState('partyLeaderSelection')
         io.emit('partyLeaders', partyLeaders)
@@ -119,9 +117,9 @@ io.on('connection', socket => {
         setGameState('dealingHands')
     })
 
-    socket.on('leadersMoved', () => {
+    socket.on('leaderMoved', () => {
         leaderMovedCount++
-        if (leaderMovedCount >= Object.keys(players).length) {
+        if (leaderMovedCount >= numberOfPlayers) {
             dealHands()
             for (let i = 0; i < 3; i++) {
                 dealMonster()
@@ -134,30 +132,48 @@ io.on('connection', socket => {
         drawCard(socketId)
     })
 
-    socket.on('cardDropped', (name, target, socketId) => {
+    socket.on('cardPlayed', (name, target, socketId) => {
         console.log(socketId, 'attempting to play:', name, 'on', target)
         players[socketId].hand.splice(players[socketId].hand.indexOf(name), 1)
         // players[socketId].heroes.push(name)
-        io.emit('cardDropped', name, target, socketId)
+        setGameState('waitingForChallengers')
+        io.emit('cardPlayed', name, target, socketId)
+    })
+
+    socket.on('challenged', (name, socketId) => {
+        reactCount = 0
+        setGameState('challenge')
+        io.emit('challenged', name, socketId)
+        // io.emit('diceRoll', randomInt(1, 6), randomInt(1, 6), socketId)
+        // io.emit('diceRoll', randomInt(1, 6), randomInt(1, 6), currentTurn)
+    })
+
+    socket.on('dontChallenge', () => {
+        reactCount++
+        if (reactCount >= numberOfPlayers) {
+            io.emit('notChallenged')
+            setGameState('ready')
+            reactCount = 0
+        }
     })
 
     socket.on('heroPlayed', (name, socketId) => {
         console.log(socketId, 'played:', name)
-        players[socketId].hand.splice(players[socketId].hand.indexOf(name), 1)
+        // players[socketId].hand.splice(players[socketId].hand.indexOf(name), 1)
         players[socketId].heroes.push(name)
         io.emit('heroPlayed', name, socketId)
     })
 
     socket.on('itemEquiped', (name, hero, socketId) => {
         console.log(socketId, 'equiped:', name, 'on', hero)
-        players[socketId].hand.splice(players[socketId].hand.indexOf(name), 1)
+        // players[socketId].hand.splice(players[socketId].hand.indexOf(name), 1)
         // players[socketId].heroes.push(name)
         io.emit('itemEquiped', name, hero, socketId)
     })
 
     socket.on('diceRoll', socketId => {
-        let result1 = randomDice(1, 6)
-        let result2 = randomDice(1, 6)
+        let result1 = randomInt(1, 6)
+        let result2 = randomInt(1, 6)
         console.log(socketId, 'Rolled:', result1+result2, '(', result1, '+', result2, ')')
         io.emit('diceRoll', result1, result2, socketId)
     })

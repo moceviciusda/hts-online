@@ -41,12 +41,29 @@ export default class InteractivityHandler {
             })
             scene.rollDice.on('pointerup', () => {
                 if (scene.GameHandler.currentTurn === scene.socket.id) {
+                    // let dice = scene.UIHandler.buildDice(500, 500)
+                    
+                    // scene.UIHandler.rollDice(dice, 4, 5)
                     // scene.UIHandler.showDice()
                     scene.socket.emit('diceRoll', scene.socket.id)
 
                     // scene.drawCard.disableInteractive()
                     // scene.socket.emit('drawCard', scene.socket.id)
                 }
+            })
+        }
+
+        this.challengeInteractivity = () => {
+            scene.dontChallengeText.on('pointerover', () => {
+                scene.dontChallengeText.setColor('#ff69b4')
+            })
+            scene.dontChallengeText.on('pointerout', () => {
+                scene.dontChallengeText.setColor('#00ffff')
+            })
+            scene.dontChallengeText.on('pointerup', () => {
+                scene.dontChallengeText.setScale(0).disableInteractive()
+                scene.challengeText.setText('Waiting for Challengers')
+                scene.socket.emit('dontChallenge', scene.socket.id)
             })
         }
 
@@ -66,7 +83,7 @@ export default class InteractivityHandler {
         }
 
         
-        
+
         scene.input.on('pointerup', (event, gameObjects) => {
             console.log(scene.GameHandler.currentTurn, scene.socket.id)
             console.log(gameObjects[0])
@@ -75,7 +92,7 @@ export default class InteractivityHandler {
                 if (scene.GameHandler.gameState === 'partyLeaderSelection' && gameObjects[0].type === 'Image' && scene.GameHandler.currentTurn == scene.socket.id && gameObjects[0].getData('available')) { //&& scene.GameHandler.turn == scene.socket.id 
                     // Clear glow effect from previously selected leader
                     scene.children.list.forEach(gameObject => {
-                        if (gameObject.getData('type') === 'partyLeaderCard') {
+                        if (gameObject.getData('type') === 'partyLeader') {
                             gameObject.postFX.clear()
                         }
                     });
@@ -91,14 +108,14 @@ export default class InteractivityHandler {
 
         scene.input.on('pointerover', (event, gameObjects) => {
             let pointer = scene.input.mousePointer
-            if (gameObjects[0].type === 'Image' && scene.GameHandler.gameState === 'partyLeaderSelection') {
+            if (gameObjects[0].getData('type') === 'partyLeader' && scene.GameHandler.gameState === 'partyLeaderSelection') {
                 scene.children.bringToTop(gameObjects[0])
             }
-            if (gameObjects[0].type === 'Image' && scene.GameHandler.gameState !== 'partyLeaderSelection' && gameObjects[0].getData('location') === 'hand') {
+            if (gameObjects[0].type === 'Image' && scene.GameHandler.gameState === 'ready' && gameObjects[0].getData('location') === 'hand') {
                 scene.children.bringToTop(gameObjects[0])
             }
             
-            if (scene.GameHandler.gameState !== 'partyLeaderSelection' && gameObjects[0].type === 'Image') {
+            if (scene.GameHandler.gameState === 'ready' && gameObjects[0].type === 'Image') {
                 // console.log(gameObjects[0])
                 // if (gameObjects[0].getData('location') === 'hand' && gameObjects[0].getData('owner') === scene.socket.id) {
                 //     scene.CardHandler.stickOut(gameObjects[0])
@@ -115,10 +132,12 @@ export default class InteractivityHandler {
                     }
                 })
             }
+
+            if (scene.alertText) scene.children.bringToTop(scene.alertText)
         })
 
         scene.input.on('pointerout', (event, gameObjects) => {
-            if (scene.GameHandler.gameState !== 'partyLeaderSelection' && gameObjects[0].type === 'Image') {
+            if (scene.GameHandler.gameState === 'ready' && gameObjects[0].type === 'Image') {
                 // if (gameObjects[0].getData('location') === 'hand' && gameObjects[0].getData('owner') === scene.socket.id) {
                 //     console.log('stickingIn')
                 //     scene.CardHandler.stickIn(gameObjects[0])
@@ -139,13 +158,15 @@ export default class InteractivityHandler {
             gameObject.y = dragY
         })
 
-
         scene.input.on('dragstart', (pointer, gameObject) => {
             this.isDragging = true
             scene.UIHandler.destroyCardPreview()
             
-            // scene.fadeBackground.setVisible(false)
-            scene.children.bringToTop(gameObject)
+            if (scene.GameHandler.gameState === 'ready' || 
+            (scene.GameHandler.gameState === 'waitingForChallengers' && gameObject.getData('type') === 'challenge')) {
+                scene.children.bringToTop(gameObject)
+            }
+
             this.highlightArray = []
             if (scene.GameHandler.currentTurn === scene.socket.id && scene.GameHandler.gameState === 'ready') {
                 scene.fadeBackground.setVisible(true)
@@ -167,11 +188,11 @@ export default class InteractivityHandler {
 
         scene.input.on('dragend', (pointer, gameObject, dropped) => {
             this.isDragging = false
-            scene.fadeBackground.setVisible(false)
-            if (scene.GameHandler.currentTurn === scene.socket.id && scene.GameHandler.gameState === 'ready') {
-                this.highlightArray.forEach(highlight => {
-                    highlight.destroy()
-                })
+            if (scene.GameHandler.gameState === 'ready') {
+                scene.fadeBackground.setVisible(false)
+                if (scene.GameHandler.currentTurn === scene.socket.id) {
+                    this.highlightArray.forEach(highlight => highlight.destroy())
+                }
             }
             if (!dropped) {
                 gameObject.x = gameObject.input.dragStartX
@@ -179,21 +200,24 @@ export default class InteractivityHandler {
             }
         })
 
-        
         scene.input.on('drop', (pointer, gameObject, dropZone) => {
             let dropped = false
             if (scene.GameHandler.currentTurn === scene.socket.id && scene.GameHandler.gameState === 'ready') {              
                 if (gameObject.getData('type') === 'hero' && dropZone === scene.playerHeroArea) {
                     dropped = true
-                    scene.socket.emit('cardDropped', gameObject.getData('name'), null, scene.socket.id)
+                    scene.socket.emit('cardPlayed', gameObject.getData('name'), null, scene.socket.id)
                     // scene.socket.emit('heroPlayed', gameObject.getData('name'), scene.socket.id)
 
                 } else if (gameObject.getData('type') === 'item' && dropZone !== scene.playerHeroArea && !dropZone.getData('item')) {
                     dropped = true
-                    scene.socket.emit('cardDropped', gameObject.getData('name'), dropZone.getData('name'), scene.socket.id)
+                    scene.socket.emit('cardPlayed', gameObject.getData('name'), dropZone.getData('name'), scene.socket.id)
                     // scene.socket.emit('itemEquiped', gameObject.getData('name'), dropZone.getData('name'), scene.socket.id)
                 }
-            } 
+            } else if (scene.GameHandler.gameState === 'waitingForChallengers' && gameObject.getData('type') === 'challenge' && dropZone.getData('playing')) {
+                dropped = true
+                gameObject.postFX.clear()
+                scene.socket.emit('challenged', gameObject.getData('name'), scene.socket.id)
+            }
 
             if (dropped) {
                 gameObject.setData('playing', true)

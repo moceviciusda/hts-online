@@ -109,24 +109,25 @@ export default class UIHandler {
         }
 
         this.buildLeaderSelectText = () => {
-            if (scene.leaderSelectionText) {
-                scene.leaderSelectionText.destroy()
-                scene.confirmLeader.destroy()
-            }
-            scene.leaderSelectionText = scene.add.text(scene.scale.width/2, 150, 'Another Player is choosing party leader')
+            if (scene.leaderSelectionText) scene.leaderSelectionText.destroy()
+            if (scene.confirmLeader) scene.confirmLeader.destroy()
+            
+            scene.leaderSelectionText = scene.add.text(scene.scale.width/2, 150, `${scene.GameHandler.currentTurn} is choosing party leader`)
             scene.leaderSelectionText.setFontSize(48).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5)
-            scene.confirmLeader = scene.add.text(scene.scale.width/2, 900, 'Confirm Leader')
-            scene.confirmLeader.setFontSize(48).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5)
-
+            
             if (scene.GameHandler.currentTurn === scene.socket.id) {
                 scene.leaderSelectionText.setText('Choose your party leader')
+
+                scene.confirmLeader = scene.add.text(scene.scale.width/2, 900, 'Confirm')
+                scene.confirmLeader.setFontSize(48).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5)
                 scene.InteractivityHandler.confirmLeaderInteractivity()
             }
         }
 
         this.alert = message => {
             scene.alertText = scene.add.text(scene.scale.width/2, scene.scale.height/2, message)
-            scene.alertText.setFontSize(64).setFontFamily('Trebuchet MS').setColor('#00ffff').setDepth(10).setOrigin(0.5, 0.5).setAlpha(0)
+            scene.alertText.setDepth(10).setFontSize(64).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5).setAlpha(0)
+            
             let appear = scene.tweens.add({
                 targets: scene.alertText,
                 alpha: 1,
@@ -163,19 +164,39 @@ export default class UIHandler {
             }
         }
 
-        this.buildChallengeView = (droppedCard, player) => {
+        this.buildChallengeView = (cardName, player) => {
             let handArea = scene.UIHandler.areas[player].handArea
-            let card = handArea.cards.find(card => card.getData('name') === droppedCard)
+            let playedCard
+            if (player === scene.socket.id) {
+                playedCard = handArea.cards.find(card => card.getData('name') === cardName && card.getData('playing'))
+            } else {
+                playedCard = handArea.cards.find(card => card.getData('name') === cardName).setData('playing')
+            }
             scene.fadeBackground.setVisible(true)
             scene.children.bringToTop(scene.fadeBackground)
+            scene.children.bringToTop(playedCard)
+            playedCard.input.dropZone = true
+            if (player !== scene.socket.id) scene.CardHandler.flipCard(playedCard)
+            let tween = scene.tweens.add({
+                targets: playedCard,
+                x: scene.scale.width/2,
+                y: scene.scale.height/2,
+                angle: 0,
+                scale: 1,
+                duration: 500,
+                onComplete: () => {
+                    tween.remove()
+                }
+            })
 
-            scene.challengeText = scene.add.text(scene.scale.width/2, 150, '')
+            scene.challengeText = scene.add.text(scene.scale.width/2, 220, '')
             .setFontSize(48).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5)
-            scene.dontChallengeText = scene.add.text(scene.scale.width/2, 900, '')
+            scene.dontChallengeText = scene.add.text(scene.scale.width/2, 860, '')
             .setFontSize(48).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5).setScale(0)
             if (player !== scene.socket.id && scene.UIHandler.areas[scene.socket.id].handArea.cards.find((card) => card.getData('type') === 'challenge')) {
-                scene.challengeText.setText(`Would you like to challenge ${player} ?`)
+                scene.challengeText.setText(`${player} is Playing ${cardName}?`)
                 scene.dontChallengeText.setText("Don't Challenge").setScale(1).setInteractive()
+                scene.InteractivityHandler.challengeInteractivity()
 
                 scene.UIHandler.areas[scene.socket.id].handArea.cards.forEach(card => {
                     if (card.getData('type') === 'challenge') {
@@ -185,32 +206,43 @@ export default class UIHandler {
                 })
             } else {
                 scene.challengeText.setText('Waiting for Challengers')
+                setTimeout(() => {scene.socket.emit('dontChallenge')}, Phaser.Math.Between(2000, 5000))
             }
-
-            scene.droppedCard = scene.add.image(scene.scale.width/2, scene.scale.height/2, card.getData('sprite'))
         }
 
-        this.buildDice = () => {
-            scene.dice1 = this.DiceHandler.createDice(scene.scale.width/2 - 100, scene.scale.height/2 + 250)
-            scene.dice2 = this.DiceHandler.createDice(scene.scale.width/2 + 100, scene.scale.height/2 + 250)
-            // this.hideDice()
+        this.destroyChallengeView = () => {
+            scene.UIHandler.areas[scene.socket.id].handArea.cards.forEach(card => {
+                if (card.getData('type') === 'challenge') {
+                    card.postFX.clear()
+                }
+            })
+            scene.fadeBackground.setVisible(false)
+            scene.challengeText.destroy()
+            scene.dontChallengeText.destroy()
+        }
+
+        this.buildDice = (x, y) => {
+            return {
+                dice1: this.DiceHandler.createDice(x - 100, y),
+                dice2: this.DiceHandler.createDice(x + 100, y)
+                }
         }
         
-        this.hideDice = () => {
-            scene.dice1.setVisible(false)
-            scene.dice2.setVisible(false)
-        }
+        // this.hideDice = () => {
+        //     scene.dice1.setVisible(false)
+        //     scene.dice2.setVisible(false)
+        // }
 
-        this.showDice = () => {
-            scene.dice1.setVisible(true)
-            scene.dice2.setVisible(true)
-            scene.children.bringToTop(scene.dice1)
-            scene.children.bringToTop(scene.dice2)
-        }
+        // this.showDice = () => {
+        //     scene.dice1.setVisible(true)
+        //     scene.dice2.setVisible(true)
+        //     scene.children.bringToTop(scene.dice1)
+        //     scene.children.bringToTop(scene.dice2)
+        // }
 
-        this.rollDice = (result1, result2) => new Promise(resolve => {
-            scene.dice1(result1)
-            .then(() => scene.dice2(result2))
+        this.rollDice = (dice, result1, result2) => new Promise(resolve => {
+            dice.dice1(result1)
+            .then(() => dice.dice2(result2))
             .then(() => resolve(result1 + result2))
         })
 
