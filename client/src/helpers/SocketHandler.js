@@ -100,15 +100,28 @@ export default class SocketHandler {
             }
 
             scene.socket.once('challenged', (challengeName, challenger) => {
-                // console.log('YOOOOOOOOOO', name, target, player, handArea, cardPlayed)
                 let challengerHandArea = scene.UIHandler.areas[challenger].handArea
-                // console.log(challengerHandArea)
-                let challengeCard
+                let challengeCard, challengerDice, playerDice
                 if (challenger === scene.socket.id) {
                     challengeCard = challengerHandArea.cards.find(card => card.getData('name') === challengeName && card.getData('playing'))
                 } else {
                     challengeCard = challengerHandArea.cards.find(card => card.getData('name') === challengeName).setData('playing', true)
                 }
+
+                // scene.socket.on('diceRoll', (result1, result2, roller) => { //new Promise(resolve => {
+                //     let dice
+                //     if (roller === challenger) {
+                //         dice = scene.UIHandler.buildDice(challengeCard.x, challengeCard.y)
+                //     } else {
+                //         dice = scene.UIHandler.buildDice(cardPlayed.x, cardPlayed.y)
+                //     }
+                //     scene.UIHandler.rollDice(dice, result1, result2)
+                //     .then(result => {
+                //         console.log(roller, 'Rolled:', result, '(', result1, '+', result2, ')')
+                //         //resolve(result)
+                //     })
+                // })//)
+
                 challengerHandArea.cards.splice(challengerHandArea.cards.indexOf(challengeCard), 1)
                 // card.setData('playing', false)
     
@@ -116,25 +129,26 @@ export default class SocketHandler {
                     scene.CardHandler.flipCard(challengeCard)
                 }
                 scene.CardHandler.moveToChallenge(challengeCard, cardPlayed)
-                .then(() => scene.CardHandler.stackHand(challenger))
-
-
-                scene.socket.emit('diceRoll', challenger)
-                scene.socket.once('diceRoll', (result1, result2, challenger) => {
-                    let challengerDice = scene.UIHandler.buildDice(challengeCard.x, challengeCard.y)
-                    scene.UIHandler.rollDice(challengerDice, result1, result2)
-                    .then(result => console.log(challenger, 'Rolled:', result, '(', result1, '+', result2, ')'))
-                    .then(() => {
-
-                        scene.socket.emit('diceRoll', player)
-                        scene.socket.once('diceRoll', (result1, result2, player) => {
-                            let playerDice = scene.UIHandler.buildDice(cardPlayed.x, cardPlayed.y)
-                            scene.UIHandler.rollDice(playerDice, result1, result2)
-                            .then(result => console.log(player, 'Rolled:', result, '(', result1, '+', result2, ')'))
+                .then(() => {
+                    scene.CardHandler.stackHand(challenger)
+                    playerDice = scene.UIHandler.buildDice(cardPlayed.x, cardPlayed.y)
+                    challengerDice = scene.UIHandler.buildDice(challengeCard.x, challengeCard.y)
+                    scene.UIHandler.rollDice(
+                        playerDice, 
+                        scene.GameHandler.players[player].lastRoll.result1,
+                        scene.GameHandler.players[player].lastRoll.result2
+                        ).then(() =>{
+                            scene.UIHandler.rollDice(
+                                challengerDice, 
+                                scene.GameHandler.players[challenger].lastRoll.result1,
+                                scene.GameHandler.players[challenger].lastRoll.result2
+                                )
                         })
-                    })
+                    
                 })
 
+                
+                    
             })
 
             scene.socket.once('notChallenged', () => {
@@ -174,7 +188,10 @@ export default class SocketHandler {
             .then(() => scene.CardHandler.stackHand(player))
         })
 
-        
+        scene.socket.on('diceRoll', (result1, result2, player) => {
+            scene.GameHandler.players[player].lastRoll = {result1: result1, result2: result2}
+            console.log(player, 'Rolled:', result1+result2, '(', result1, '+', result2, ')')
+        })
         
     }
 }

@@ -143,9 +143,9 @@ io.on('connection', socket => {
     socket.on('challenged', (name, socketId) => {
         reactCount = 0
         setGameState('challenge')
+        io.emit('diceRoll', randomInt(1, 6), randomInt(1, 6), socketId)
+        io.emit('diceRoll', randomInt(1, 6), randomInt(1, 6), currentTurn)
         io.emit('challenged', name, socketId)
-        // io.emit('diceRoll', randomInt(1, 6), randomInt(1, 6), socketId)
-        // io.emit('diceRoll', randomInt(1, 6), randomInt(1, 6), currentTurn)
     })
 
     socket.on('dontChallenge', () => {
