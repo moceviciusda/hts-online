@@ -11,8 +11,8 @@ export default class UIHandler {
 
         this.buildCommonAreas = () => {
             scene.monsterArea = scene.add.rectangle(scene.scale.width/2 - 110, scene.scale.height/2, 688, 300).setStrokeStyle(4, 0xff69b4)
-            scene.deckArea = scene.add.rectangle(1304, scene.scale.height/2+79, 220, 158).setStrokeStyle(4, 0xff69b4)
-            scene.discardArea = scene.add.rectangle(1304, scene.scale.height/2-79, 220, 158).setStrokeStyle(4, 0xff69b4)
+            scene.deckArea = scene.add.rectangle(1304, scene.scale.height/2+79, 158, 220).setAngle(-90).setStrokeStyle(4, 0xff69b4)
+            scene.discardArea = scene.add.rectangle(1304, scene.scale.height/2-79, 158, 220).setAngle(-90).setStrokeStyle(4, 0xff69b4)
         }
 
         this.buildPlayerAreas = () => {
@@ -243,7 +243,7 @@ export default class UIHandler {
         this.rollDice = (dice, result1, result2) => new Promise(resolve => {
             dice.dice1(result1)
             .then(() => dice.dice2(result2))
-            .then(() => resolve(result1 + result2))
+            .then(() => resolve())
         })
 
         this.buildUI = () => {

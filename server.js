@@ -157,6 +157,11 @@ io.on('connection', socket => {
         }
     })
 
+    socket.on('challengeFailed', () => {
+        io.emit('notChallenged')
+        setGameState('ready')
+    })
+
     socket.on('heroPlayed', (name, socketId) => {
         console.log(socketId, 'played:', name)
         // players[socketId].hand.splice(players[socketId].hand.indexOf(name), 1)

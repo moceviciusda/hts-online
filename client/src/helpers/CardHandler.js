@@ -159,12 +159,27 @@ export default class CardHandler {
                 duration: 200,
                 onComplete: () => {
                     challengeTarget.setData('location', 'board')
-                    resolve()
                     targetTween.remove()
                 }
             })
         })
 
+        this.moveToDiscard = card => new Promise(resolve => {
+            scene.children.bringToTop(card)
+            let tween = scene.tweens.add({
+                targets: card,
+                x: scene.discardArea.x,
+                y: scene.discardArea.y,
+                angle: scene.discardArea.angle,
+                scale: 0.5,
+                duration: 500,
+                onComplete: () => {
+                    card.setData('location', 'discard')
+                    resolve()
+                    tween.remove()
+                }
+            })
+        })
 
         this.stickOut = card => {
             let tween = scene.tweens.add({
