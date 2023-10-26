@@ -3,7 +3,7 @@ export default class DiceHandler {
         this.createDice = (x, y, duration = 1000) => {
             let diceIsRolling = false;
         
-            const dice = scene.add.mesh(x, y, "dice-albedo");
+            const dice = scene.add.mesh(x, y, "dice-albedo").setScale(.5);
             const shadowFX = dice.postFX.addShadow(0, 0, 0.006, 2, 0x111111, 10, .8);
             dice.addVerticesFromObj("dice-obj", 0.25);
             dice.panZ(6);
@@ -23,7 +23,7 @@ export default class DiceHandler {
                         ease: "Sine.easeInOut",
                         yoyo: true,
                     });
-        
+                    scene.children.bringToTop(dice)
                     scene.add.tween({
                         targets: dice,
                         from: 0,
@@ -67,12 +67,12 @@ export default class DiceHandler {
                     // Intro dice
                     scene.add.tween({
                         targets: [dice],
-                        scale: 1.2,
+                        scale: .7,
                         duration: duration - 200,
                         yoyo: true,
                         ease: Phaser.Math.Easing.Quadratic.InOut,
                         onComplete: () => {
-                            dice.scale = 1;
+                            dice.scale = .5;
                             diceIsRolling = false;
                             resolve(diceRoll)
                             // if (callback !== undefined) {

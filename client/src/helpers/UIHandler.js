@@ -164,14 +164,7 @@ export default class UIHandler {
             }
         }
 
-        this.buildChallengeView = (cardName, player) => {
-            let handArea = scene.UIHandler.areas[player].handArea
-            let playedCard
-            if (player === scene.socket.id) {
-                playedCard = handArea.cards.find(card => card.getData('name') === cardName && card.getData('playing'))
-            } else {
-                playedCard = handArea.cards.find(card => card.getData('name') === cardName).setData('playing')
-            }
+        this.buildChallengeView = (playedCard, player) => {
             scene.fadeBackground.setVisible(true)
             scene.children.bringToTop(scene.fadeBackground)
             scene.children.bringToTop(playedCard)
@@ -194,7 +187,7 @@ export default class UIHandler {
             scene.dontChallengeText = scene.add.text(scene.scale.width/2, 860, '')
             .setFontSize(48).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5).setScale(0)
             if (player !== scene.socket.id && scene.UIHandler.areas[scene.socket.id].handArea.cards.find((card) => card.getData('type') === 'challenge')) {
-                scene.challengeText.setText(`${player} is Playing ${cardName}?`)
+                scene.challengeText.setText(`${player} is Playing ${playedCard.getData('name')}`)
                 scene.dontChallengeText.setText("Don't Challenge").setScale(1).setInteractive()
                 scene.InteractivityHandler.challengeInteractivity()
 
@@ -210,28 +203,39 @@ export default class UIHandler {
             }
         }
 
+        this.challenged = (player, challenger) => {
+            scene.challengeText.setText(`${challenger} Challenged ${player}`)
+            scene.dontChallengeText.setScale(0)
+        }
+
         this.destroyChallengeView = () => {
             scene.UIHandler.areas[scene.socket.id].handArea.cards.forEach(card => {
                 if (card.getData('type') === 'challenge') {
-                    card.postFX.clear()
+                    card.preFX.clear()
                 }
             })
             scene.fadeBackground.setVisible(false)
             scene.challengeText.destroy()
             scene.dontChallengeText.destroy()
+            this.destroyDice()
         }
 
         this.buildDice = (x, y) => {
             return {
-                dice1: this.DiceHandler.createDice(x - 100, y),
-                dice2: this.DiceHandler.createDice(x + 100, y)
+                dice1: this.DiceHandler.createDice(x - 65, y),
+                dice2: this.DiceHandler.createDice(x + 65, y)
                 }
         }
         
-        // this.hideDice = () => {
-        //     scene.dice1.setVisible(false)
-        //     scene.dice2.setVisible(false)
-        // }
+        this.destroyDice = () => {
+            let diceList = []
+            scene.children.list.forEach(gameObject => {
+                if (gameObject.type === 'Mesh') {
+                    diceList.push(gameObject)
+                }
+            })
+            diceList.forEach(dice => dice.destroy())
+        }
 
         // this.showDice = () => {
         //     scene.dice1.setVisible(true)

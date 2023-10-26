@@ -93,7 +93,7 @@ export default class InteractivityHandler {
                     // Clear glow effect from previously selected leader
                     scene.children.list.forEach(gameObject => {
                         if (gameObject.getData('type') === 'partyLeader') {
-                            gameObject.postFX.clear()
+                            gameObject.preFX.clear()
                         }
                     });
 
@@ -173,13 +173,14 @@ export default class InteractivityHandler {
                 scene.children.bringToTop(scene.fadeBackground)
                 scene.children.bringToTop(gameObject)
                 if (gameObject.getData('type') === 'hero') {
-                    this.highlightArray.push(this.UIHandler.ZoneHandler.renderOutline(scene.playerHeroArea, 0x00ffff))
+                    // this.highlightArray.push(this.UIHandler.ZoneHandler.renderOutline(scene.playerHeroArea, 0x00ffff))
                 } else if (gameObject.getData('type') === 'item') {
                     scene.UIHandler.heroesOnBoard().forEach(hero => {
                         if (!hero.getData('item')) {
-                            this.highlightArray.push(this.UIHandler.ZoneHandler.renderOutline(hero, 0x00ffff))
+                            // this.highlightArray.push(this.UIHandler.ZoneHandler.renderOutline(hero, 0x00ffff))
                             scene.children.bringToTop(hero)
-                            // scene.CardHandler.highlight(hero)
+                            scene.CardHandler.highlight(hero)
+                            this.highlightArray.push(hero)
                         }
                     });
                 }
@@ -190,8 +191,9 @@ export default class InteractivityHandler {
             this.isDragging = false
             if (scene.GameHandler.gameState === 'ready') {
                 scene.fadeBackground.setVisible(false)
-                if (scene.GameHandler.currentTurn === scene.socket.id) {
-                    this.highlightArray.forEach(highlight => highlight.destroy())
+                if (scene.GameHandler.currentTurn === scene.socket.id && this.highlightArray) {
+                    // this.highlightArray.forEach(highlight => highlight.destroy())
+                    this.highlightArray.forEach(card => card.preFX.clear())
                 }
             }
             if (!dropped) {
@@ -202,26 +204,28 @@ export default class InteractivityHandler {
 
         scene.input.on('drop', (pointer, gameObject, dropZone) => {
             let dropped = false
+            let emit
             if (scene.GameHandler.currentTurn === scene.socket.id && scene.GameHandler.gameState === 'ready') {              
                 if (gameObject.getData('type') === 'hero' && dropZone === scene.playerHeroArea) {
                     dropped = true
-                    scene.socket.emit('cardPlayed', gameObject.getData('name'), null, scene.socket.id)
+                    emit = () => scene.socket.emit('cardPlayed', gameObject.getData('name'), null, scene.socket.id)
                     // scene.socket.emit('heroPlayed', gameObject.getData('name'), scene.socket.id)
 
                 } else if (gameObject.getData('type') === 'item' && dropZone !== scene.playerHeroArea && !dropZone.getData('item')) {
                     dropped = true
-                    scene.socket.emit('cardPlayed', gameObject.getData('name'), dropZone.getData('name'), scene.socket.id)
+                    emit = () => scene.socket.emit('cardPlayed', gameObject.getData('name'), dropZone.getData('name'), scene.socket.id)
                     // scene.socket.emit('itemEquiped', gameObject.getData('name'), dropZone.getData('name'), scene.socket.id)
                 }
             } else if (scene.GameHandler.gameState === 'waitingForChallengers' && gameObject.getData('type') === 'challenge' && dropZone.getData('playing')) {
                 dropped = true
-                gameObject.postFX.clear()
-                scene.socket.emit('challenged', gameObject.getData('name'), scene.socket.id)
+                gameObject.preFX.clear()
+                emit = () => scene.socket.emit('challenged', gameObject.getData('name'), scene.socket.id)
             }
 
             if (dropped) {
                 gameObject.setData('playing', true)
                 scene.input.setDraggable(gameObject, false)
+                emit()
             } else {
                 gameObject.x = gameObject.input.dragStartX
                 gameObject.y = gameObject.input.dragStartY

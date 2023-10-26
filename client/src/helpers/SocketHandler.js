@@ -37,7 +37,7 @@ export default class SocketHandler {
                 scene.confirmLeader.destroy()
                 scene.fadeBackground.setVisible(false)
                 scene.GameHandler.partyLeaders.forEach(leader => {
-                    leader.postFX.clear()
+                    leader.preFX.clear()
                     leader.setTint()
                     for (let player in scene.GameHandler.players) {
                         if (leader.getData('name') === scene.GameHandler.players[player].partyLeader) {
@@ -90,14 +90,15 @@ export default class SocketHandler {
         })
 
         scene.socket.on('cardPlayed', (name, target, player) => {
-            scene.UIHandler.buildChallengeView(name, player)
             let handArea = scene.UIHandler.areas[player].handArea
             let cardPlayed
+            console.log(handArea)
             if (player === scene.socket.id) {
                 cardPlayed = handArea.cards.find(card => card.getData('name') === name && card.getData('playing'))
             } else {
                 cardPlayed = handArea.cards.find(card => card.getData('name') === name).setData('playing', true)
             }
+            scene.UIHandler.buildChallengeView(cardPlayed, player)
 
             scene.socket.once('notChallenged', () => {
                 scene.UIHandler.destroyChallengeView()
@@ -106,6 +107,7 @@ export default class SocketHandler {
                     if (cardPlayed.getData('type') === 'hero') scene.socket.emit('heroPlayed', name, player)
                     else if (cardPlayed.getData('type') === 'item')scene.socket.emit('itemEquiped', name, target, player)    
                 }
+                scene.socket.removeAllListeners("challenged")
             })
 
             scene.socket.once('challenged', (challengeName, challenger) => {
@@ -125,9 +127,10 @@ export default class SocketHandler {
                 
                 scene.CardHandler.moveToChallenge(challengeCard, cardPlayed)
                 .then(() => new Promise(resolve => {
+                    scene.UIHandler.challenged(player, challenger)
                     scene.CardHandler.stackHand(challenger)
-                    playerDice = scene.UIHandler.buildDice(cardPlayed.x, cardPlayed.y)
-                    challengerDice = scene.UIHandler.buildDice(challengeCard.x, challengeCard.y)
+                    playerDice = scene.UIHandler.buildDice(cardPlayed.x, cardPlayed.y + 300)
+                    challengerDice = scene.UIHandler.buildDice(challengeCard.x, challengeCard.y + 300)
                     scene.UIHandler.rollDice(
                         playerDice, 
                         players[player].lastRoll.result1,
@@ -142,12 +145,21 @@ export default class SocketHandler {
                     })
                 }))
                 .then(() => {
-                    if (players[player].lastRoll.result1+players[player].lastRoll.result2 > players[challenger].lastRoll.result1+players[challenger].lastRoll.result2) {
-                        scene.socket.emit('challengeFailed')
+                    if (players[player].lastRoll.result1+players[player].lastRoll.result2 >= players[challenger].lastRoll.result1+players[challenger].lastRoll.result2) {
+                        if (player === scene.socket.id) scene.socket.emit('challengeFailed')
                         scene.CardHandler.moveToDiscard(challengeCard)
                     } else {
+                        handArea.cards.splice(handArea.cards.indexOf(cardPlayed), 1)
                         scene.CardHandler.moveToDiscard(cardPlayed)
+                        cardPlayed.setData('playing', false)
+
+                        challengerHandArea.cards.splice(handArea.cards.indexOf(challengeCard), 1)
                         scene.CardHandler.moveToDiscard(challengeCard)
+                        challengeCard.setData('playing', false)
+
+                        scene.UIHandler.destroyChallengeView()
+                        if (player === scene.socket.id) scene.socket.emit('challengeSuccessful')
+                        scene.socket.removeAllListeners("notChallenged")
                     }
                     // console.log(players[player].lastRoll.result1+players[player].lastRoll.result2)
                 })

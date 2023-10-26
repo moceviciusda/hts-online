@@ -204,13 +204,33 @@ export default class CardHandler {
         }
 
         this.highlight = card => {
-            let glow = card.postFX.addGlow(0xffffff, 0, 0, false, 0.1, 64)
-            let tween = scene.tweens.add({
-                targets: glow,
-                outerStrength: 4,
-                duration: 300,
+            let glow0 = card.preFX.addGlow(0xffffff, 0, 0, false)//, 0.01, 64)
+            let tween0 = scene.tweens.add({
+                targets: glow0,
+                outerStrength: 2,
+                duration: 200,
                 onComplete: () => {
-                    tween.remove()
+                    
+                    let glow1 = card.preFX.addGlow(0xffffff, 0, 0, false)
+                    let tween1 = scene.tweens.add({
+                        targets: glow1,
+                        outerStrength: 2,
+                        duration: 200,
+                        onComplete: () => {
+
+                            let glow2 = card.preFX.addGlow(0xffffff, 0, 0, false)
+                            let tween2 = scene.tweens.add({
+                                targets: glow2,
+                                outerStrength: 2,
+                                duration: 200,
+                                onComplete: () => {
+                                    tween2.remove()
+                                }
+                            })
+                            tween1.remove()
+                        }
+                    })
+                    tween0.remove()
                 }
             })
         }
