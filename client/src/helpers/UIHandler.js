@@ -17,6 +17,7 @@ export default class UIHandler {
 
         this.buildPlayerAreas = () => {
             scene.playerHandArea = {x: scene.scale.width/2, y: scene.scale.height, cards: []}
+            // scene.playerHandArea = scene.add.container(scene.scale.width/2, scene.scale.height, 0, 0).setData('cards', [])
             scene.playerHeroArea = this.ZoneHandler.renderZone(scene.scale.width/2, 800, 1078, 216).setData('heroes', [])
             this.ZoneHandler.renderOutline(scene.playerHeroArea, 0xff69b4)
             scene.playerLeaderArea = scene.add.rectangle(702, 1000, 172, 300).setStrokeStyle(4, 0xff69b4)
@@ -150,9 +151,9 @@ export default class UIHandler {
 
         this.buildCardPreview = card => {
             if (card.getData('item')) {
-                scene.itemPreview = scene.add.image(scene.scale.width/2, scene.scale.height/2+80, card.getData('item').getData('sprite'))
+                scene.itemPreview = scene.add.image(scene.scale.width/2, scene.scale.height/2+80, card.getData('item').getData('sprite')).setScale(1.5)
             }
-            scene.cardPreview = scene.add.image(scene.scale.width/2, scene.scale.height/2, card.getData('sprite'))
+            scene.cardPreview = scene.add.image(scene.scale.width/2, scene.scale.height/2, card.getData('sprite')).setScale(1.5)
         }
 
         this.destroyCardPreview = () => {
@@ -204,7 +205,7 @@ export default class UIHandler {
         }
 
         this.challenged = (player, challenger) => {
-            scene.challengeText.setText(`${challenger} Challenged ${player}`)
+            scene.challengeText.setText(`${player} Challenged by ${challenger}`)
             scene.dontChallengeText.setScale(0)
         }
 
@@ -221,20 +222,25 @@ export default class UIHandler {
         }
 
         this.buildDice = (x, y) => {
+            let valueText = scene.add.text(x, y, '0', { fontFamily: 'Arial Black', fontSize: 98, color: '#c51b7d' })
+            valueText.setStroke('#de77ae', 16).setScale(0).setOrigin(0.5).setData('diceValueText', true);
             return {
+                x: x,
+                y: y,
+                valueText: valueText,
                 dice1: this.DiceHandler.createDice(x - 65, y),
                 dice2: this.DiceHandler.createDice(x + 65, y)
                 }
         }
         
         this.destroyDice = () => {
-            let diceList = []
+            let destroyList = []
             scene.children.list.forEach(gameObject => {
-                if (gameObject.type === 'Mesh') {
-                    diceList.push(gameObject)
+                if (gameObject.type === 'Mesh' || gameObject.getData('diceValueText')) {
+                    destroyList.push(gameObject)
                 }
             })
-            diceList.forEach(dice => dice.destroy())
+            destroyList.forEach(dice => dice.destroy())
         }
 
         // this.showDice = () => {
@@ -247,7 +253,28 @@ export default class UIHandler {
         this.rollDice = (dice, result1, result2) => new Promise(resolve => {
             dice.dice1(result1)
             .then(() => dice.dice2(result2))
-            .then(() => resolve())
+            .then(() => {
+                dice.valueText.text = result1+result2;
+                scene.children.bringToTop(dice.valueText)
+                let tween = scene.add.tween({
+                    targets: dice.valueText,
+                    scale: 1,
+                    duration: 1000,
+                    ease: Phaser.Math.Easing.Bounce.Out,
+                    onComplete: () => {
+                        resolve()
+                        // scene.add.tween({
+                        //     targets: textDiceValue,
+                        //     scale: 0,
+                        //     delay: 1000,
+                        //     duration: 1000,
+                        //     ease: Phaser.Math.Easing.Bounce.Out,
+                        //     onComplete: () => resolve()
+                        // });
+                        tween.destroy()
+                    }
+                });
+            })
         })
 
         this.buildUI = () => {

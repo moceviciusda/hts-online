@@ -187,13 +187,13 @@ export default class DeckHandler {
                 suspiciouslyShinyCoin: new SuspiciouslyShinyCoin(scene), 
             }
             let newCard = cards[name]
-            console.log(newCard)
 
             return newCard.render(x, y, owner)
         }
         
         this.drawCard = (name, owner) => {
-            let card = scene.DeckHandler.dealCard(scene.deckArea.x, scene.deckArea.y, name, owner).setData('location', 'hand')
+            let card = scene.DeckHandler.dealCard(scene.deckArea.x, scene.deckArea.y, name, owner)
+            .setData('location', 'hand').setAngle(scene.deckArea.angle)
             scene.UIHandler.areas[owner].handArea.cards.push(card)
             scene.CardHandler.moveToHand(card, owner)
             .then(() => scene.CardHandler.stackHand(owner))
@@ -205,5 +205,6 @@ export default class DeckHandler {
             scene.GameHandler.monsters.push(monster)
         }        
         
+        // this.discard = ()
     }
 }

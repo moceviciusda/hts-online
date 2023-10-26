@@ -85,7 +85,6 @@ export default class InteractivityHandler {
         
 
         scene.input.on('pointerup', (event, gameObjects) => {
-            console.log(scene.GameHandler.currentTurn, scene.socket.id)
             console.log(gameObjects[0])
             // Selecting Party Leader
             if (gameObjects.length) {
@@ -98,7 +97,6 @@ export default class InteractivityHandler {
                     });
 
                     scene.GameHandler.players[scene.socket.id].partyLeader = gameObjects[0].getData('name')
-                    console.log(scene.GameHandler.players[scene.socket.id].partyLeader)
                     scene.CardHandler.highlight(gameObjects[0])
 
                     scene.confirmLeader.setInteractive()
@@ -108,32 +106,33 @@ export default class InteractivityHandler {
 
         scene.input.on('pointerover', (event, gameObjects) => {
             let pointer = scene.input.mousePointer
-            if (gameObjects[0].getData('type') === 'partyLeader' && scene.GameHandler.gameState === 'partyLeaderSelection') {
-                scene.children.bringToTop(gameObjects[0])
-            }
-            if (gameObjects[0].type === 'Image' && scene.GameHandler.gameState === 'ready' && gameObjects[0].getData('location') === 'hand') {
-                scene.children.bringToTop(gameObjects[0])
-            }
-            
-            if (scene.GameHandler.gameState === 'ready' && gameObjects[0].type === 'Image') {
-                // console.log(gameObjects[0])
-                // if (gameObjects[0].getData('location') === 'hand' && gameObjects[0].getData('owner') === scene.socket.id) {
-                //     scene.CardHandler.stickOut(gameObjects[0])
-                //     console.log('stickingOut')
-                // }
-                this.previewTimer = scene.time.delayedCall(500, () => {
-                    if (!this.isDragging){
-                        scene.fadeBackground.setVisible(true)
-                        scene.children.bringToTop(scene.fadeBackground)
-                        if (gameObjects[0].getData('type') === 'hero') {
-                            scene.children.bringToTop(gameObjects[0])
-                        }
-                        scene.UIHandler.buildCardPreview(gameObjects[0])
-                    }
-                })
-            }
+            if (gameObjects[0].type === 'Image' && !['htsCardBack', 'htsMonsterBack'].includes(gameObjects[0].texture.key)) {
 
-            if (scene.alertText) scene.children.bringToTop(scene.alertText)
+                if (scene.GameHandler.gameState === 'partyLeaderSelection' && gameObjects[0].getData('type') === 'partyLeader') {
+                    scene.children.bringToTop(gameObjects[0])
+
+                } else if (scene.GameHandler.gameState === 'ready') {
+
+                    if (gameObjects[0].getData('location') === 'hand') scene.children.bringToTop(gameObjects[0])
+                    this.previewTimer = scene.time.delayedCall(500, () => {
+                        if (!this.isDragging){
+                            scene.fadeBackground.setVisible(true)
+                            scene.children.bringToTop(scene.fadeBackground)
+                            if (gameObjects[0].getData('type') === 'hero') {
+                                scene.children.bringToTop(gameObjects[0])
+                            }
+                            scene.UIHandler.buildCardPreview(gameObjects[0])
+                        }
+                    })
+                }
+                
+                // if (gameObjects[0].getData('location') === 'hand' && gameObjects[0].getData('owner') === scene.socket.id) {
+                    //     scene.CardHandler.stickOut(gameObjects[0])
+                    //     console.log('stickingOut')
+                    // }
+
+                if (scene.alertText) scene.children.bringToTop(scene.alertText)
+            }
         })
 
         scene.input.on('pointerout', (event, gameObjects) => {
@@ -173,14 +172,14 @@ export default class InteractivityHandler {
                 scene.children.bringToTop(scene.fadeBackground)
                 scene.children.bringToTop(gameObject)
                 if (gameObject.getData('type') === 'hero') {
-                    // this.highlightArray.push(this.UIHandler.ZoneHandler.renderOutline(scene.playerHeroArea, 0x00ffff))
+                    this.highlightArray.push(this.UIHandler.ZoneHandler.renderOutline(scene.playerHeroArea, 0x00ffff))
                 } else if (gameObject.getData('type') === 'item') {
                     scene.UIHandler.heroesOnBoard().forEach(hero => {
                         if (!hero.getData('item')) {
-                            // this.highlightArray.push(this.UIHandler.ZoneHandler.renderOutline(hero, 0x00ffff))
+                            this.highlightArray.push(this.UIHandler.ZoneHandler.renderOutline(hero, 0x00ffff))
                             scene.children.bringToTop(hero)
-                            scene.CardHandler.highlight(hero)
-                            this.highlightArray.push(hero)
+                            // scene.CardHandler.highlight(hero)
+                            // this.highlightArray.push(hero)
                         }
                     });
                 }
@@ -192,8 +191,8 @@ export default class InteractivityHandler {
             if (scene.GameHandler.gameState === 'ready') {
                 scene.fadeBackground.setVisible(false)
                 if (scene.GameHandler.currentTurn === scene.socket.id && this.highlightArray) {
-                    // this.highlightArray.forEach(highlight => highlight.destroy())
-                    this.highlightArray.forEach(card => card.preFX.clear())
+                    this.highlightArray.forEach(highlight => highlight.destroy())
+                    // this.highlightArray.forEach(card => card.preFX.clear())
                 }
             }
             if (!dropped) {

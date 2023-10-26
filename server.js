@@ -22,6 +22,7 @@ let baseHeroes = ['badAxe', 'bearClaw', 'bearyWise', 'furyKnuckle', 'heavyBear',
 let baseItems = ['bardMask', 'decoyDoll', 'fighterMask', 'guardianMask', 'particularlyRustyCoin', 'particularlyRustyCoin', 'rangerMask', 'reallyBigRing', 'reallyBigRing', 'thiefMask', 'wizardMask', 'curseOfTheSnakesEyes', 'curseOfTheSnakesEyes', 'sealingKey', 'suspiciouslyShinyCoin']
 let challenges = ['challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge']
 let deck = [].concat(baseHeroes, baseItems, challenges)
+// deck = ['challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge']
 let discard = []
 let gameState = 'initializing'
 let currentTurn
@@ -150,7 +151,8 @@ io.on('connection', socket => {
         io.emit('challenged', name, socketId)
     })
 
-    socket.on('dontChallenge', () => {
+    socket.on('dontChallenge', socketId => {
+        console.log()
         reactCount++
         if (reactCount >= numberOfPlayers) {
             io.emit('notChallenged')
@@ -162,7 +164,7 @@ io.on('connection', socket => {
     socket.on('challengeFailed', challengeName => {
         discard.push(challengeName)
         io.emit('notChallenged')
-        setGameState('ready')
+        // setGameState('ready')
     })
 
     socket.on('challengeSuccessful', (challengeName, cardName) => {
@@ -177,6 +179,7 @@ io.on('connection', socket => {
         // players[socketId].hand.splice(players[socketId].hand.indexOf(name), 1)
         players[socketId].heroes.push(name)
         io.emit('heroPlayed', name, socketId)
+        setGameState('ready')
     })
 
     socket.on('itemEquiped', (name, hero, socketId) => {
@@ -184,6 +187,7 @@ io.on('connection', socket => {
         // players[socketId].hand.splice(players[socketId].hand.indexOf(name), 1)
         // players[socketId].heroes.push(name)
         io.emit('itemEquiped', name, hero, socketId)
+        setGameState('ready')
     })
 
     socket.on('diceRoll', socketId => {
