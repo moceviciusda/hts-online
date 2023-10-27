@@ -5,5 +5,9 @@ export default class Orthus extends MonsterCard {
         super(scene)
         this.name = 'orthus'
         this.cardSprite = 'orthus'
+        this.battleRequirements = {
+            heroCount: 2,
+            classRequirements: {wizard: 1}
+        }
     }
 }

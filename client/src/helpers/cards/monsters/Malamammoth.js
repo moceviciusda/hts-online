@@ -5,5 +5,9 @@ export default class Malamammoth extends MonsterCard {
         super(scene)
         this.name = 'malamammoth'
         this.cardSprite = 'malamammoth'
+        this.battleRequirements = {
+            heroCount: 2,
+            classRequirements: {ranger: 1}
+        }
     }
 }

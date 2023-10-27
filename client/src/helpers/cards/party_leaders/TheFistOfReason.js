@@ -5,5 +5,6 @@ export default class TheFistOfReason extends LeaderCard {
         super(scene)
         this.name = 'theFistOfReason'
         this.cardSprite = 'theFistOfReason'
+        this.class = 'fighter'
     }
 }

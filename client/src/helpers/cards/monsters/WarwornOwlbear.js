@@ -5,5 +5,9 @@ export default class WarwornOwlbear extends MonsterCard {
         super(scene)
         this.name = 'warwornOwlbear'
         this.cardSprite = 'warwornOwlbear'
+        this.battleRequirements = {
+            heroCount: 2,
+            classRequirements: {thief: 1}
+        }
     }
 }

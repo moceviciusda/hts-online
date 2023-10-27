@@ -5,5 +5,9 @@ export default class AbyssQueen extends MonsterCard {
         super(scene)
         this.name = 'abyssQueen'
         this.cardSprite = 'abyssQueen'
+        this.battleRequirements = {
+            heroCount: 2,
+            classRequirements: {}
+        }
     }
 }

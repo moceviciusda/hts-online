@@ -5,5 +5,6 @@ export default class TheCharismaticSong extends LeaderCard {
         super(scene)
         this.name = 'theCharismaticSong'
         this.cardSprite = 'theCharismaticSong'
+        this.class = 'bard'
     }
 }

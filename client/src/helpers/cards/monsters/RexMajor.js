@@ -5,5 +5,9 @@ export default class RexMajor extends MonsterCard {
         super(scene)
         this.name = 'rexMajor'
         this.cardSprite = 'rexMajor'
+        this.battleRequirements = {
+            heroCount: 2,
+            classRequirements: {guardian: 1}
+        }
     }
 }

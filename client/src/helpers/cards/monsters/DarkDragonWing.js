@@ -1,9 +1,14 @@
 import MonsterCard from "./MonsterCard"
 
-export default class DarkDragonWing extends MonsterCard {
+export default class DarkDragonKing extends MonsterCard {
     constructor(scene) {
         super(scene)
-        this.name = 'darkDragonWing'
-        this.cardSprite = 'darkDragonWing'
+        this.name = 'darkDragonKing'
+        this.cardSprite = 'darkDragonKing'
+        this.battleRequirements = {
+            heroCount: 2,
+            classRequirements: {bard: 1}
+        }
+
     }
 }

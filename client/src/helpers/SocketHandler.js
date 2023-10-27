@@ -61,6 +61,9 @@ export default class SocketHandler {
 
             if (gameState === 'ready') {
                 if (scene.GameHandler.currentTurn === scene.socket.id) {
+                    scene.monsterArea.getData('cards').forEach(monster => {
+                        monster.checkRequirements(scene.socket.id) ? scene.CardHandler.highlight(monster) : monster.preFX.clear()
+                    })
                     scene.endTurn.setInteractive()
                 }
             }

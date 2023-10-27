@@ -15,7 +15,7 @@ import ArcticAries from "./cards/monsters/ArcticAries"
 import Bloodwing from "./cards/monsters/Bloodwing"
 import CorruptedSabretooth from "./cards/monsters/CorruptedSabretooth"
 import CrownedSerpent from "./cards/monsters/CrownedSerpent"
-import DarkDragonWing from "./cards/monsters/darkDragonWing"
+import DarkDragonKing from "./cards/monsters/DarkDragonKing"
 import Dracos from "./cards/monsters/Dracos"
 import Malamammoth from "./cards/monsters/Malamammoth"
 import MegaSlime from "./cards/monsters/MegaSlime"
@@ -113,7 +113,7 @@ export default class DeckHandler {
                 bloodwing: new Bloodwing(scene),
                 corruptedSabretooth: new CorruptedSabretooth(scene),
                 crownedSerpent: new CrownedSerpent(scene),
-                darkDragonWing: new DarkDragonWing(scene),
+                DarkDragonKing: new DarkDragonKing(scene),
                 dracos: new Dracos(scene),
                 malamammoth: new Malamammoth(scene),
                 megaSlime: new MegaSlime(scene),
@@ -202,7 +202,7 @@ export default class DeckHandler {
         this.dealMonster = name => {
             let monster = scene.DeckHandler.dealCard(scene.monsterArea.x+344-85, scene.monsterArea.y, name, null)
             scene.CardHandler.moveToMonsterArea(monster)
-            scene.GameHandler.monsters.push(monster)
+            scene.monsterArea.data.list.cards.push(monster)
         }        
         
         // this.discard = ()

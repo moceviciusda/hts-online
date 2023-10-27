@@ -5,5 +5,6 @@ export default class TheShadowClaw extends LeaderCard {
         super(scene)
         this.name = 'theShadowClaw'
         this.cardSprite = 'theShadowClaw'
+        this.class = 'thief'
     }
 }

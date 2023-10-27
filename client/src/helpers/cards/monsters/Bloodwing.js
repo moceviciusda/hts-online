@@ -5,5 +5,9 @@ export default class Bloodwing extends MonsterCard {
         super(scene)
         this.name = 'bloodwing'
         this.cardSprite = 'bloodwing'
+        this.battleRequirements = {
+            heroCount: 2,
+            classRequirements: {}
+        }
     }
 }

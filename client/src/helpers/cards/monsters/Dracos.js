@@ -5,5 +5,9 @@ export default class Dracos extends MonsterCard {
         super(scene)
         this.name = 'dracos'
         this.cardSprite = 'dracos'
+        this.battleRequirements = {
+            heroCount: 1,
+            classRequirements: {}
+        }
     }
 }

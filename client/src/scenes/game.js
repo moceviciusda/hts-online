@@ -36,7 +36,7 @@ export default class Game extends Phaser.Scene {
         this.load.image('bloodwing', 'src/assets/monsters/Bloodwing.png')
         this.load.image('corruptedSabretooth', 'src/assets/monsters/Corrupted_Sabretooth.png')
         this.load.image('crownedSerpent', 'src/assets/monsters/Crowned_Serpent.png')
-        this.load.image('darkDragonWing', 'src/assets/monsters/Dark_Dragon_Wing.png')
+        this.load.image('darkDragonKing', 'src/assets/monsters/Dark_Dragon_King.png')
         this.load.image('dracos', 'src/assets/monsters/Dracos.png')
         this.load.image('malamammoth', 'src/assets/monsters/Malamammoth.png')
         this.load.image('megaSlime', 'src/assets/monsters/Mega_Slime.png')

@@ -5,5 +5,9 @@ export default class TitanWyvern extends MonsterCard {
         super(scene)
         this.name = 'titanWyvern'
         this.cardSprite = 'titanWyvern'
+        this.battleRequirements = {
+            heroCount: 2,
+            classRequirements: {fighter: 1}
+        }
     }
 }

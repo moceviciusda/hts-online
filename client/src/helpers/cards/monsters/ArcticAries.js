@@ -5,5 +5,9 @@ export default class ArcticAries extends MonsterCard {
         super(scene)
         this.name = 'arcticAries'
         this.cardSprite = 'arcticAries'
+        this.battleRequirements = {
+            heroCount: 1,
+            classRequirements: {}
+        }
     }
 }

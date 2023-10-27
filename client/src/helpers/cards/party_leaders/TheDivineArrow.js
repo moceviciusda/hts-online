@@ -5,5 +5,6 @@ export default class TheDivineArrow extends LeaderCard {
         super(scene)
         this.name = 'theDivineArrow'
         this.cardSprite = 'theDivineArrow'
+        this.class = 'ranger'
     }
 }

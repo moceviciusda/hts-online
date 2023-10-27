@@ -5,5 +5,9 @@ export default class CorruptedSabretooth extends MonsterCard {
         super(scene)
         this.name = 'corruptedSabretooth'
         this.cardSprite = 'corruptedSabretooth'
+        this.battleRequirements = {
+            heroCount: 3,
+            classRequirements: {}
+        }
     }
 }

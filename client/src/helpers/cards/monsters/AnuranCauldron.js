@@ -5,5 +5,9 @@ export default class AnuranCauldron extends MonsterCard {
         super(scene)
         this.name = 'anuranCauldron'
         this.cardSprite = 'anuranCauldron'
+        this.battleRequirements = {
+            heroCount: 3,
+            classRequirements: {}
+        }
     }
 }

@@ -13,7 +13,7 @@ export default class DiceHandler {
             return (diceRoll = Phaser.Math.Between(1, 6)) => new Promise(resolve => {
                 if (!diceIsRolling) {
                     diceIsRolling = true;
-        
+                    
                     // Shadow
                     scene.add.tween({
                         targets: shadowFX,

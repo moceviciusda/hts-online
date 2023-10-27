@@ -2,11 +2,13 @@ export default class CardHandler {
     constructor(scene) {
 
         this.moveToLeaderArea = card => new Promise(resolve => {
+            let ownerAreas = scene.UIHandler.areas[card.getData('owner')]
+            ownerAreas.leaderArea.setData('card', card)
             let tween = scene.tweens.add({
                 targets: card,
-                x: scene.UIHandler.areas[card.getData('owner')].leaderArea.x,
-                y: scene.UIHandler.areas[card.getData('owner')].leaderArea.y,
-                angle: scene.UIHandler.areas[card.getData('owner')].angle,
+                x: ownerAreas.leaderArea.x,
+                y: ownerAreas.leaderArea.y,
+                angle: ownerAreas.angle,
                 scale: 0.5,
                 duration: 500,
                 onComplete: () => {
@@ -19,7 +21,7 @@ export default class CardHandler {
         this.moveToMonsterArea = card => new Promise(resolve => {
             let tween = scene.tweens.add({
                 targets: card,
-                x: scene.monsterArea.x-344+85+172*scene.GameHandler.monsters.length,
+                x: scene.monsterArea.x-344+85+172*scene.monsterArea.getData('cards').length,
                 y: scene.monsterArea.y,
                 duration: 500,
                 onComplete: () => {
