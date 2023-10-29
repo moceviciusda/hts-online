@@ -62,7 +62,8 @@ export default class SocketHandler {
             if (gameState === 'ready') {
                 if (scene.GameHandler.currentTurn === scene.socket.id) {
                     scene.monsterArea.getData('cards').forEach(monster => {
-                        monster.checkRequirements(scene.socket.id) ? scene.CardHandler.highlight(monster) : monster.preFX.clear()
+                        monster.preFX.clear()
+                        if (monster.checkRequirements(scene.socket.id)) scene.CardHandler.highlight(monster)
                     })
                     scene.endTurn.setInteractive()
                 }
@@ -129,14 +130,13 @@ export default class SocketHandler {
                 
                 scene.CardHandler.moveToChallenge(challengeCard, cardPlayed)
                 .then(() => new Promise(resolve => {
+                    scene.UIHandler.destroyCardPreview()
                     scene.UIHandler.challenged(player, challenger)
                     scene.CardHandler.stackHand(challenger)
 
                     playerDice = scene.UIHandler.buildDice(cardPlayed.x, cardPlayed.y + 300)
-                    console.log(playerDice)
-                    
                     challengerDice = scene.UIHandler.buildDice(challengeCard.x, challengeCard.y + 300)
-                    console.log(challengerDice)
+
                     scene.UIHandler.rollDice(
                         playerDice, 
                         players[player].lastRoll.result1,
@@ -200,6 +200,23 @@ export default class SocketHandler {
             let hero = scene.UIHandler.heroesOnBoard().find(card => card.getData('name') === heroName)
             scene.CardHandler.equipItem(item, hero)
             .then(() => scene.CardHandler.stackHand(player))
+        })
+
+        scene.socket.on('attacking', (monsterName, player) => {
+            let monsterCard = scene.monsterArea.getData('cards').find(card => card.getData('name') === monsterName)
+
+            scene.UIHandler.buildAttackView(monsterCard, player)
+            .then(() => new Promise(resolve => {
+                let dice = scene.UIHandler.buildDice(scene.scale.width/2, scene.scale.height/2)
+                
+                scene.UIHandler.rollDice(
+                    dice, 
+                    scene.GameHandler.players[player].lastRoll.result1,
+                    scene.GameHandler.players[player].lastRoll.result2
+                    )
+                .then(() => resolve())
+            }))
+            .then(() => monsterCard.checkSlay(scene.GameHandler.players[player].lastRoll.result1 + scene.GameHandler.players[player].lastRoll.result2))
         })
 
         scene.socket.on('diceRoll', (result1, result2, player) => {

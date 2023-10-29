@@ -7,7 +7,6 @@ export default class UIHandler {
         this.DiceHandler = new DiceHandler(scene)
 
         this.areas = {}
-        this.partyLeadersDealt = false
 
         this.buildCommonAreas = () => {
             scene.monsterArea = scene.add.rectangle(scene.scale.width/2 - 110, scene.scale.height/2, 688, 300).setStrokeStyle(4, 0xff69b4).setData('cards', [])
@@ -157,12 +156,8 @@ export default class UIHandler {
         }
 
         this.destroyCardPreview = () => {
-            if (scene.cardPreview) {
-                scene.cardPreview.destroy()
-            }
-            if (scene.itemPreview) {
-                scene.itemPreview.destroy()
-            }
+            if (scene.cardPreview) scene.cardPreview.destroy()
+            if (scene.itemPreview) scene.itemPreview.destroy()
         }
 
         this.buildChallengeView = (playedCard, player) => {
@@ -243,12 +238,6 @@ export default class UIHandler {
             destroyList.forEach(dice => dice.destroy())
         }
 
-        // this.showDice = () => {
-        //     scene.dice1.setVisible(true)
-        //     scene.dice2.setVisible(true)
-        //     scene.children.bringToTop(scene.dice1)
-        //     scene.children.bringToTop(scene.dice2)
-        // }
 
         this.rollDice = (dice, result1, result2) => new Promise(resolve => {
             dice.dice1(result1)
@@ -262,7 +251,7 @@ export default class UIHandler {
                     duration: 1000,
                     ease: Phaser.Math.Easing.Bounce.Out,
                     onComplete: () => {
-                        resolve()
+                        resolve(result1 + result2)
                         // scene.add.tween({
                         //     targets: textDiceValue,
                         //     scale: 0,
@@ -276,6 +265,47 @@ export default class UIHandler {
                 });
             })
         })
+
+        this.buildAttackView = (monsterCard, player) => new Promise(resolve => {
+            let partyLeaderCard = this.areas[player].leaderArea.getData('card')
+
+            scene.fadeBackground.setVisible(true)
+            scene.children.bringToTop(scene.fadeBackground)
+            scene.children.bringToTop(monsterCard)
+            scene.children.bringToTop(partyLeaderCard)
+
+            scene.attackingText = scene.add.text(scene.scale.width/2, 180, `${player} is Attacking ${monsterCard.getData('name')}`)
+            .setFontSize(48).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5)
+
+            let monsterTween = scene.tweens.add({
+                targets: monsterCard,
+                x: scene.scale.width/2 + monsterCard.displayWidth*2,
+                y: scene.scale.height/2,
+                angle: 0,
+                scale: 1,
+                duration: 500,
+                onComplete: () => {
+                    monsterTween.remove()
+                }
+            })
+
+            let playerTween = scene.tweens.add({
+                targets: partyLeaderCard,
+                x: scene.scale.width/2 - partyLeaderCard.displayWidth*2,
+                y: scene.scale.height/2,
+                angle: 0,
+                scale: 1,
+                duration: 500,
+                onComplete: () => {
+                    resolve()
+                    playerTween.remove()
+                }
+            })
+        })
+
+        this.destroySlayView = () => {
+            if (scene.attackingText) scene.attackingText.destroy()
+        }
 
         this.buildUI = () => {
             this.buildCommonAreas()

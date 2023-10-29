@@ -113,7 +113,7 @@ export default class DeckHandler {
                 bloodwing: new Bloodwing(scene),
                 corruptedSabretooth: new CorruptedSabretooth(scene),
                 crownedSerpent: new CrownedSerpent(scene),
-                DarkDragonKing: new DarkDragonKing(scene),
+                darkDragonKing: new DarkDragonKing(scene),
                 dracos: new Dracos(scene),
                 malamammoth: new Malamammoth(scene),
                 megaSlime: new MegaSlime(scene),

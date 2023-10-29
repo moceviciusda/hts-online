@@ -12,15 +12,15 @@ export default class MonsterCard {
                 battleRequirements: this.battleRequirements
             })
 
-            card.checkRequirements = (player) => {
+            card.checkRequirements = player => {
                 let playerAreas = scene.UIHandler.areas[player]
                 let classCount = 0
                 if (playerAreas.heroArea.getData('heroes').length < this.battleRequirements.heroCount) return false
                 
                 else {
-                    for (classRequirement in this.battleRequirements.classRequirements) {
+                    for (let classRequirement in this.battleRequirements.classRequirements) {
                         classCount = playerAreas.heroArea.getData('heroes').filter(hero => hero.getData('class') === classRequirement).length
-                        if (playerAreas.partyLeaderArea.getData('card').getData('class') === classRequirement) classCount++
+                        if (playerAreas.leaderArea.getData('card').getData('class') === classRequirement) classCount++
 
                         if (classCount < this.battleRequirements.classRequirements[classRequirement]) return false
                     }
@@ -29,7 +29,16 @@ export default class MonsterCard {
                 }
             }
 
+            card.checkSlay = this.checkSlay
+
+            card.on('pointerup', () => {
+                if (scene.GameHandler.currentTurn === scene.socket.id && !card.getData('owner') && card.checkRequirements(scene.socket.id)) {
+                    scene.socket.emit('attacking', card.getData('name'), scene.socket.id)
+                }
+            })
+
             return card
         }
+        
     }
 }

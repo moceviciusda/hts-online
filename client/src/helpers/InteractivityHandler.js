@@ -7,12 +7,8 @@ export default class InteractivityHandler {
         this.isDragging = false
 
         this.gameTextInteractivity = () => {
-            scene.endTurn.on('pointerover', () => {
-                scene.endTurn.setColor('#ff69b4')
-            })
-            scene.endTurn.on('pointerout', () => {
-                scene.endTurn.setColor('#00ffff')
-            })
+            scene.endTurn.on('pointerover', () => scene.endTurn.setColor('#ff69b4'))
+            scene.endTurn.on('pointerout', () => scene.endTurn.setColor('#00ffff'))
             scene.endTurn.on('pointerup', () => {
                 if (scene.GameHandler.currentTurn === scene.socket.id) {
                     scene.endTurn.disableInteractive()
@@ -20,12 +16,8 @@ export default class InteractivityHandler {
                 }
             })
 
-            scene.drawCard.on('pointerover', () => {
-                scene.drawCard.setColor('#ff69b4')
-            })
-            scene.drawCard.on('pointerout', () => {
-                scene.drawCard.setColor('#00ffff')
-            })
+            scene.drawCard.on('pointerover', () => scene.drawCard.setColor('#ff69b4'))
+            scene.drawCard.on('pointerout', () => scene.drawCard.setColor('#00ffff'))
             scene.drawCard.on('pointerup', () => {
                 if (scene.GameHandler.currentTurn === scene.socket.id) {
                     // scene.drawCard.disableInteractive()
@@ -33,12 +25,8 @@ export default class InteractivityHandler {
                 }
             })
 
-            scene.rollDice.on('pointerover', () => {
-                scene.rollDice.setColor('#ff69b4')
-            })
-            scene.rollDice.on('pointerout', () => {
-                scene.rollDice.setColor('#00ffff')
-            })
+            scene.rollDice.on('pointerover', () => scene.rollDice.setColor('#ff69b4'))
+            scene.rollDice.on('pointerout', () => scene.rollDice.setColor('#00ffff'))
             scene.rollDice.on('pointerup', () => {
                 if (scene.GameHandler.currentTurn === scene.socket.id) {
                     // let dice = scene.UIHandler.buildDice(500, 500)
@@ -54,12 +42,8 @@ export default class InteractivityHandler {
         }
 
         this.challengeInteractivity = () => {
-            scene.dontChallengeText.on('pointerover', () => {
-                scene.dontChallengeText.setColor('#ff69b4')
-            })
-            scene.dontChallengeText.on('pointerout', () => {
-                scene.dontChallengeText.setColor('#00ffff')
-            })
+            scene.dontChallengeText.on('pointerover', () => scene.dontChallengeText.setColor('#ff69b4'))
+            scene.dontChallengeText.on('pointerout', () => scene.dontChallengeText.setColor('#00ffff'))
             scene.dontChallengeText.on('pointerup', () => {
                 scene.dontChallengeText.setScale(0).disableInteractive()
                 scene.challengeText.setText('Waiting for Challengers')
@@ -68,12 +52,8 @@ export default class InteractivityHandler {
         }
 
         this.confirmLeaderInteractivity = () => {
-            scene.confirmLeader.on('pointerover', () => {
-                scene.confirmLeader.setColor('#ff69b4')
-            })
-            scene.confirmLeader.on('pointerout', () => {
-                scene.confirmLeader.setColor('#00ffff')
-            })
+            scene.confirmLeader.on('pointerover', () => scene.confirmLeader.setColor('#ff69b4'))
+            scene.confirmLeader.on('pointerout', () => scene.confirmLeader.setColor('#00ffff'))
             scene.confirmLeader.on('pointerup', () => {
                 if (scene.GameHandler.currentTurn === scene.socket.id && scene.GameHandler.players[scene.socket.id].partyLeader) {
                     scene.socket.emit('leaderPicked', scene.socket.id, scene.GameHandler.players[scene.socket.id].partyLeader)
@@ -82,7 +62,6 @@ export default class InteractivityHandler {
             })
         }
 
-        
 
         scene.input.on('pointerup', (event, gameObjects) => {
             console.log(gameObjects[0])
@@ -115,7 +94,7 @@ export default class InteractivityHandler {
 
                     if (gameObjects[0].getData('location') === 'hand') scene.children.bringToTop(gameObjects[0])
                     this.previewTimer = scene.time.delayedCall(500, () => {
-                        if (!this.isDragging){
+                        if (!this.isDragging) {
                             scene.fadeBackground.setVisible(true)
                             scene.children.bringToTop(scene.fadeBackground)
                             if (gameObjects[0].getData('type') === 'hero') {

@@ -142,13 +142,24 @@ io.on('connection', socket => {
         io.emit('cardPlayed', name, target, socketId)
     })
 
+    socket.on('attacking', (monsterName, socketId) => {
+        setGameState('attacking')
+        io.emit('diceRoll', randomInt(1, 6), randomInt(1, 6), socketId)
+        console.log(socketId, 'Rolled:', result1+result2, '(', result1, '+', result2, ')')
+        io.emit('attacking', monsterName, socketId)
+        console.log(socketId, 'attacking', monsterName)
+    })
+
     socket.on('challenged', (name, socketId) => {
         reactCount = 0
         players[socketId].hand.splice(players[socketId].hand.indexOf(name), 1)
         setGameState('challenge')
         io.emit('diceRoll', randomInt(1, 6), randomInt(1, 6), socketId)
+        console.log(socketId, 'Rolled:', result1+result2, '(', result1, '+', result2, ')')
         io.emit('diceRoll', randomInt(1, 6), randomInt(1, 6), currentTurn)
+        console.log(currentTurn, 'Rolled:', result1+result2, '(', result1, '+', result2, ')')
         io.emit('challenged', name, socketId)
+        console.log(socketId, 'challenged', currentTurn)
     })
 
     socket.on('dontChallenge', socketId => {
