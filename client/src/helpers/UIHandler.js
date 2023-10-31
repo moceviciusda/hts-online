@@ -20,7 +20,7 @@ export default class UIHandler {
             scene.playerHeroArea = this.ZoneHandler.renderZone(scene.scale.width/2, 800, 1078, 216).setData('heroes', [])
             this.ZoneHandler.renderOutline(scene.playerHeroArea, 0xff69b4)
             scene.playerLeaderArea = scene.add.rectangle(702, 1000, 172, 300).setStrokeStyle(4, 0xff69b4)
-            scene.playerSlayArea = scene.add.rectangle(1046, 1000, 516, 300).setStrokeStyle(4, 0xff69b4)
+            scene.playerSlayArea = scene.add.rectangle(1046, 1000, 516, 300).setStrokeStyle(4, 0xff69b4).setData('monsters', [])
         }
         
         this.assignPlayerAreas = () => {
@@ -37,17 +37,17 @@ export default class UIHandler {
             scene.topOpponentHandArea = {x: scene.scale.width/2, y: 0, cards: []}
             scene.topOpponentHeroArea = scene.add.rectangle(scene.scale.width/2, 280, 1078, 216).setStrokeStyle(4, 0xff69b4).setData('heroes', [])
             scene.topOpponentLeaderArea = scene.add.rectangle(1218, 80, 172, 300).setStrokeStyle(4, 0xff69b4)
-            scene.topOpponentSlayArea = scene.add.rectangle(874, 80, 516, 300).setStrokeStyle(4, 0xff69b4)
+            scene.topOpponentSlayArea = scene.add.rectangle(874, 80, 516, 300).setStrokeStyle(4, 0xff69b4).setData('monsters', [])
 
             scene.leftOpponentHandArea = {x: 0, y: scene.scale.height/2, cards: []}
             scene.leftOpponentHeroArea = scene.add.rectangle(280, scene.scale.height/2, 216, 1078).setStrokeStyle(4, 0xff69b4).setData('heroes', [])
             scene.leftOpponentLeaderArea = scene.add.rectangle(80, 282, 300, 172).setStrokeStyle(4, 0xff69b4)
-            scene.leftOpponentSlayArea = scene.add.rectangle(80, scene.scale.height/2 + 86, 300, 516).setStrokeStyle(4, 0xff69b4)
+            scene.leftOpponentSlayArea = scene.add.rectangle(80, scene.scale.height/2 + 86, 300, 516).setStrokeStyle(4, 0xff69b4).setData('monsters', [])
 
             scene.rightOpponentHandArea = {x: scene.scale.width, y: scene.scale.height/2, cards: []}
             scene.rightOpponentHeroArea = scene.add.rectangle(1640, scene.scale.height/2, 216, 1078).setStrokeStyle(4, 0xff69b4).setData('heroes', [])
             scene.rightOpponentLeaderArea = scene.add.rectangle(1840, 798, 300, 172).setStrokeStyle(4, 0xff69b4)
-            scene.rightOpponentSlayArea = scene.add.rectangle(1840, scene.scale.height/2 - 86, 300, 516).setStrokeStyle(4, 0xff69b4)
+            scene.rightOpponentSlayArea = scene.add.rectangle(1840, scene.scale.height/2 - 86, 300, 516).setStrokeStyle(4, 0xff69b4).setData('monsters', [])
 
             this.availableAreas = [
                 {
@@ -150,7 +150,7 @@ export default class UIHandler {
 
         this.buildCardPreview = card => {
             if (card.getData('item')) {
-                scene.itemPreview = scene.add.image(scene.scale.width/2, scene.scale.height/2+80, card.getData('item').getData('sprite')).setScale(1.5)
+                scene.itemPreview = scene.add.image(scene.scale.width/2, scene.scale.height/2+120, card.getData('item').getData('sprite')).setScale(1.5)
             }
             scene.cardPreview = scene.add.image(scene.scale.width/2, scene.scale.height/2, card.getData('sprite')).setScale(1.5)
         }
@@ -303,8 +303,86 @@ export default class UIHandler {
             })
         })
 
-        this.destroySlayView = () => {
+        this.destroyAttackView = () => {
             if (scene.attackingText) scene.attackingText.destroy()
+            scene.fadeBackground.setVisible(false)
+        }
+
+        this.buildSacrificeHeroView = count => {
+            let heroes = scene.UIHandler.areas[scene.socket.id].heroArea.getData('heroes')
+            let sacrificeCounter = 0
+            if (count > heroes.length) sacrificeCounter += count - heroes.length
+            if (heroes.length > 0) {
+                scene.socket.emit('setGameState', 'sacrificing')
+
+                scene.fadeBackground.setVisible(true)
+                scene.children.bringToTop(scene.fadeBackground)
+
+                scene.sacrificeText = scene.add.text(scene.scale.width/2, 220, `Sacrifice ${count} Hero(es)`)
+                .setFontSize(72).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5)
+         
+                heroes.forEach(hero => {
+                    if (hero.getData('item')) scene.children.bringToTop(hero.getData('item'))
+                    scene.children.bringToTop(hero)
+
+                    hero.on('pointerover', () => this.buildCardPreview(hero))
+                    hero.on('pointerout', () => this.destroyCardPreview())
+                    hero.once('pointerup', () => {
+                        scene.socket.emit('heroSacrificed', hero.getData('name'), scene.socket.id)
+                        sacrificeCounter++
+                        if (sacrificeCounter >= count || heroes.length <= 0) {
+                            heroes.forEach(h => h.removeAllListeners())
+                            this.destroySacrificeHeroView()
+                            scene.socket.emit('setGameState', 'ready')
+                        }
+                    })
+                })
+            } else {
+                scene.socket.emit('setGameState', 'ready')
+            }
+        }
+
+        this.destroySacrificeHeroView = () => {
+            if (scene.sacrificeText) scene.sacrificeText.destroy()
+            scene.fadeBackground.setVisible(false)
+        }
+
+        this.buildDiscardView = count => {
+            let hand = scene.UIHandler.areas[scene.socket.id].handArea.cards
+            let discardCounter = 0
+            if (count > hand.length) discardCounter += count - hand.length
+            if (hand.length > 0) {
+                scene.socket.emit('setGameState', 'discarding')
+                
+                scene.fadeBackground.setVisible(true)
+                scene.children.bringToTop(scene.fadeBackground)
+
+                scene.discardText = scene.add.text(scene.scale.width/2, 220, `Discard ${count} Card(s)`)
+                .setFontSize(72).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5)
+
+                hand.forEach(card => {
+                    scene.children.bringToTop(card)
+
+                    card.on('pointerover', () => this.buildCardPreview(card))
+                    card.on('pointerout', () => this.destroyCardPreview())
+                    card.once('pointerup', () => {
+                        scene.socket.emit('discard', card.getData('name'), scene.socket.id)
+                        discardCounter++
+                        if (discardCounter >= count) {
+                            hand.forEach(h => h.removeAllListeners())
+                            this.destroyDiscardView()
+                            scene.socket.emit('setGameState', 'ready')
+                        }
+                    })
+                })
+            } else {
+                scene.socket.emit('setGameState', 'ready')
+            }
+        }
+
+        this.destroyDiscardView = () => {
+            if (scene.discardText) scene.discardText.destroy()
+            scene.fadeBackground.setVisible(false)
         }
 
         this.buildUI = () => {

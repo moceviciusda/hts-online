@@ -204,6 +204,7 @@ export default class SocketHandler {
 
         scene.socket.on('attacking', (monsterName, player) => {
             let monsterCard = scene.monsterArea.getData('cards').find(card => card.getData('name') === monsterName)
+            monsterCard.preFX.clear()
 
             scene.UIHandler.buildAttackView(monsterCard, player)
             .then(() => new Promise(resolve => {
@@ -216,13 +217,50 @@ export default class SocketHandler {
                     )
                 .then(() => resolve())
             }))
-            .then(() => monsterCard.checkSlay(scene.GameHandler.players[player].lastRoll.result1 + scene.GameHandler.players[player].lastRoll.result2))
+            .then(() => {
+                let result = monsterCard.checkSlay(scene.GameHandler.players[player].lastRoll.result1 + scene.GameHandler.players[player].lastRoll.result2)
+                
+                scene.UIHandler.destroyAttackView()
+                scene.UIHandler.destroyDice()
+                scene.CardHandler.moveToLeaderArea(scene.UIHandler.areas[player].leaderArea.getData('card'))
+                
+                if (result === 'success') {
+                    scene.monsterArea.data.list.cards.splice(scene.monsterArea.data.list.cards.indexOf(monsterCard), 1)
+                    monsterCard.setData('owner', player)
+                    
+                    scene.CardHandler.moveToSlayArea(monsterCard)
+                    .then(() => {
+                        scene.UIHandler.areas[player].slayArea.data.list.monsters.push(monsterCard)
+                        if (scene.socket.id === scene.GameHandler.currentTurn) scene.socket.emit('monsterSlayed', monsterCard.getData('name'), player)
+                        monsterCard.slay(player)
+                    })
+                    
+                } else if (result === 'fail') {
+                    monsterCard.defeat(player)
+                } else {
+                    if (scene.socket.id === scene.GameHandler.currentTurn) scene.socket.emit('monsterSurvived', monsterCard.getData('name'), player)
+                }
+                scene.CardHandler.stackMonsters()
+            })
         })
 
         scene.socket.on('diceRoll', (result1, result2, player) => {
             scene.GameHandler.players[player].lastRoll = {result1: result1, result2: result2}
             console.log(player, 'Rolled:', result1+result2, '(', result1, '+', result2, ')')
         })
+
+        scene.socket.on('heroSacrificed', (heroName, player) => {
+            let hero = scene.UIHandler.areas[player].heroArea.data.list.heroes.find(card => card.getData('name') === heroName)
+            scene.CardHandler.sacrificeHero(hero)
+        })
         
+        scene.socket.on('discard', (cardName, player) => {
+            let card = scene.UIHandler.areas[player].handArea.cards.find(card => card.getData('name') === cardName)
+            scene.CardHandler.discard(card)
+            // .then(() => {
+            //     scene.UIHandler.destroyDiscardView()
+            //     if (scene.socket.id === player) scene.socket.emit('setGameState', 'ready')
+            // })
+        })
     }
 }

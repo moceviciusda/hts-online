@@ -10,18 +10,17 @@ export default class CorruptedSabretooth extends MonsterCard {
             classRequirements: {}
         }
 
-        this.slay = () => {
+        this.slay = player => {
             console.log(this.name, 'slain')
-        }
-
-        this.defeat = () => {
-            console.log(this.name, 'defeat')
+            if (scene.socket.id === scene.GameHandler.currentTurn) {
+                scene.socket.emit('drawCard', player)
+            }
         }
 
         this.checkSlay = roll => {
-            if (roll >= 9) this.slay()
-            else if (roll <= 6) this.defeat()
-            else console.log(this.name, 'neutral')
+            if (roll >= 9)      return 'success'
+            else if (roll <= 6) return 'fail'
+            else                return 'neutral'
         }
     }
 }

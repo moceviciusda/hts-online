@@ -10,18 +10,10 @@ export default class Dracos extends MonsterCard {
             classRequirements: {}
         }
 
-        this.slay = () => {
-            console.log(this.name, 'slain')
-        }
-
-        this.defeat = () => {
-            console.log(this.name, 'defeat')
-        }
-
         this.checkSlay = roll => {
-            if (roll <= 5) this.slay()
-            else if (roll >= 8) this.defeat()
-            else console.log(this.name, 'neutral')
+            if (roll <= 5)      return 'success'
+            else if (roll >= 8) return 'fail'
+            else                return 'neutral'
         }
     }
 }

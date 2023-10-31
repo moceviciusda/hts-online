@@ -93,6 +93,10 @@ io.on('connection', socket => {
         console.log(gameTurn, ':', currentTurn)
     })
 
+    socket.on('setGameState', state => {
+        setGameState(state)
+    })
+
     socket.on('ready', socketId => {
         shuffle(deck)
         shuffle(monsterDeck)
@@ -144,22 +148,45 @@ io.on('connection', socket => {
 
     socket.on('attacking', (monsterName, socketId) => {
         setGameState('attacking')
-        io.emit('diceRoll', randomInt(1, 6), randomInt(1, 6), socketId)
-        console.log(socketId, 'Rolled:', result1+result2, '(', result1, '+', result2, ')')
+        let roll1 = randomInt(1, 6)
+        let roll2 = randomInt(1, 6)
+        io.emit('diceRoll', roll1, roll2, socketId)
+        console.log(socketId, 'Rolled:', roll1+roll2, '(', roll1, '+', roll2, ')')
         io.emit('attacking', monsterName, socketId)
         console.log(socketId, 'attacking', monsterName)
     })
 
+    socket.on('monsterSlayed', (monsterName, socketId) => {
+        monsters.splice(monsters.indexOf(monsterName), 1)
+        players[socketId].monsters.push(monsterName)
+        dealMonster()
+        setGameState('ready')
+        console.log(socketId, 'has slain', monsterName)
+    })
+
+    socket.on('monsterSurvived', (monsterName, socketId) => {
+        setGameState('ready')
+        console.log(socketId, 'failed to slay', monsterName)
+    })
+
     socket.on('challenged', (name, socketId) => {
         reactCount = 0
+        console.log(socketId, 'challenged', currentTurn)
         players[socketId].hand.splice(players[socketId].hand.indexOf(name), 1)
         setGameState('challenge')
-        io.emit('diceRoll', randomInt(1, 6), randomInt(1, 6), socketId)
-        console.log(socketId, 'Rolled:', result1+result2, '(', result1, '+', result2, ')')
-        io.emit('diceRoll', randomInt(1, 6), randomInt(1, 6), currentTurn)
-        console.log(currentTurn, 'Rolled:', result1+result2, '(', result1, '+', result2, ')')
+
+        let roll1 = randomInt(1, 6)
+        let roll2 = randomInt(1, 6)
+        io.emit('diceRoll', roll1, roll2, socketId)
+        console.log(socketId, 'Rolled:', roll1+roll2, '(', roll1, '+', roll2, ')')
+        
+        roll1 = randomInt(1, 6)
+        roll2 = randomInt(1, 6)
+        io.emit('diceRoll', roll1, roll2, currentTurn)
+        console.log(currentTurn, 'Rolled:', roll1+roll2, '(', roll1, '+', roll2, ')')
+
         io.emit('challenged', name, socketId)
-        console.log(socketId, 'challenged', currentTurn)
+        
     })
 
     socket.on('dontChallenge', socketId => {
@@ -199,6 +226,20 @@ io.on('connection', socket => {
         // players[socketId].heroes.push(name)
         io.emit('itemEquiped', name, hero, socketId)
         setGameState('ready')
+    })
+
+    socket.on('heroSacrificed', (heroName, socketId) => {
+        players[socketId].heroes.splice(players[socketId].heroes.indexOf(heroName), 1)
+        discard.push(heroName)
+        io.emit('heroSacrificed', heroName, socketId)
+        console.log(socketId, 'sacrificed', heroName)
+    })
+
+    socket.on('discard', (cardName, socketId) => {
+        players[socketId].hand.splice(players[socketId].hand.indexOf(cardName), 1)
+        discard.push(cardName)
+        io.emit('discard', cardName, socketId)
+        console.log(socketId, 'discarded', cardName)
     })
 
     socket.on('diceRoll', socketId => {

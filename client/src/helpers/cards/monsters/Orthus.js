@@ -10,18 +10,16 @@ export default class Orthus extends MonsterCard {
             classRequirements: {wizard: 1}
         }
 
-        this.slay = () => {
-            console.log(this.name, 'slain')
+        this.defeat = player => {
+            if (scene.socket.id === player) {
+                scene.UIHandler.buildDiscardView(2)
+            }
         }
-
-        this.defeat = () => {
-            console.log(this.name, 'defeat')
-        }
-
+        
         this.checkSlay = roll => {
-            if (roll >= 8) this.slay()
-            else if (roll <= 4) this.defeat()
-            else console.log(this.name, 'neutral')
+            if (roll >= 8)      return 'success'
+            else if (roll <= 4) return 'fail'
+            else                return 'neutral'
         }
     }
 }

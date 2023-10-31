@@ -10,16 +10,17 @@ export default class MegaSlime extends MonsterCard {
             classRequirements: {}
         }
 
-        this.slay = () => {
+        this.slay = player => {
             console.log(this.name, 'slain')
-        }
-
-        this.defeat = () => {
-            console.log(this.name, 'defeat')
+            if (scene.socket.id === scene.GameHandler.currentTurn) {
+                scene.socket.emit('drawCard', player)
+                scene.socket.emit('drawCard', player)
+            }
         }
 
         this.checkSlay = roll => {
-            roll > 7 ? this.slay() : this.defeat()
+            if (roll > 7)   return 'success'
+            else            return 'fail'
         }
     }
 }

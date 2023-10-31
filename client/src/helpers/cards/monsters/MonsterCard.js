@@ -31,8 +31,19 @@ export default class MonsterCard {
 
             card.checkSlay = this.checkSlay
 
+            this.slay ? card.slay = this.slay : card.slay = player => {
+                console.log(player, 'has slain', this.name)
+            }
+
+            this.defeat? card.defeat = this.defeat : card.defeat = player => {
+                if (scene.socket.id === player && scene.UIHandler.areas[player].heroArea.getData('heroes').length > 0) {
+                    scene.UIHandler.buildSacrificeHeroView(1)
+                }
+            }
+
             card.on('pointerup', () => {
-                if (scene.GameHandler.currentTurn === scene.socket.id && !card.getData('owner') && card.checkRequirements(scene.socket.id)) {
+                if (scene.GameHandler.currentTurn === scene.socket.id && !card.getData('owner') 
+                && card.checkRequirements(scene.socket.id) && scene.GameHandler.gameState === 'ready') {
                     scene.socket.emit('attacking', card.getData('name'), scene.socket.id)
                 }
             })

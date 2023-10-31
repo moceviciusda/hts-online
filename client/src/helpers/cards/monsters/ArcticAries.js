@@ -10,18 +10,10 @@ export default class ArcticAries extends MonsterCard {
             classRequirements: {}
         }
 
-        this.slay = () => {
-            console.log(this.name, 'slain')
-        }
-
-        this.defeat = () => {
-            console.log(this.name, 'defeat')
-        }
-
         this.checkSlay = roll => {
-            if (roll >= 10) this.slay()
-            else if (roll <= 6) this.defeat()
-            else console.log(this.name, 'neutral')
+            if (roll >= 10)     return 'success'
+            else if (roll <= 6) return 'fail'
+            else                return 'neutral'
         }
     }
 }

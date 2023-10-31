@@ -10,18 +10,10 @@ export default class Terratuga extends MonsterCard {
             classRequirements: {}
         }
 
-        this.slay = () => {
-            console.log(this.name, 'slain')
-        }
-
-        this.defeat = () => {
-            console.log(this.name, 'defeat')
-        }
-
         this.checkSlay = roll => {
-            if (roll >= 11) this.slay()
-            else if (roll <= 7) this.defeat()
-            else console.log(this.name, 'neutral')
+            if (roll >= 11)     return 'success'
+            else if (roll <= 7) return 'fail'
+            else                return 'neutral'
         }
     }
 }

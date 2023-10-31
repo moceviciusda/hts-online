@@ -12,19 +12,72 @@ export default class CardHandler {
                 scale: 0.5,
                 duration: 500,
                 onComplete: () => {
+                    scene.children.sendToBack(card)
                     resolve()
                     tween.remove()
                 }
             })
         })
 
-        this.moveToMonsterArea = card => new Promise(resolve => {
+        // this.moveToMonsterArea = card => new Promise(resolve => {
+        //     let tween = scene.tweens.add({
+        //         targets: card,
+        //         x: scene.monsterArea.x-344+85+172*scene.monsterArea.getData('cards').length,
+        //         y: scene.monsterArea.y,
+        //         scale: 0.5,
+        //         duration: 500,
+        //         onComplete: () => {
+        //             resolve()
+        //             tween.remove()
+        //         }
+        //     })
+        // })
+
+        this.stackMonsters = () => new Promise(resolve => {
+            for (let i=0; i<scene.monsterArea.getData('cards').length; i++) {
+                let tween = scene.tweens.add({
+                    targets: scene.monsterArea.getData('cards')[i],
+                    x: scene.monsterArea.x-344+85+172*i,
+                    y: scene.monsterArea.y,
+                    scale: 0.5,
+                    duration: 300,
+                    onComplete: () => {
+                        if (i >= scene.monsterArea.getData('cards').length-1) resolve()
+                        tween.remove()
+                    }
+                })
+            }
+        })
+
+        this.moveToSlayArea = card => new Promise(resolve => {
+            let xSpread, ySpread, xPlus, yPlus
+            let slayArea = scene.UIHandler.areas[card.getData('owner')].slayArea
+            switch (scene.UIHandler.areas[card.getData('owner')].angle) {
+                case 90:
+                case -90:
+                    xSpread = 0
+                    ySpread = card.displayWidth
+                    xPlus = 0
+                    yPlus = -slayArea.height/2 + ySpread/4
+                    break
+                case 180:
+                default:
+                    xSpread = card.displayWidth
+                    ySpread = 0
+                    xPlus = -slayArea.width/2 + xSpread/4
+                    yPlus = 0
+                    break
+            }
             let tween = scene.tweens.add({
                 targets: card,
-                x: scene.monsterArea.x-344+85+172*scene.monsterArea.getData('cards').length,
-                y: scene.monsterArea.y,
+                x: slayArea.x + xPlus + xSpread*slayArea.getData('monsters').length/2,
+                y: slayArea.y + yPlus + ySpread*slayArea.getData('monsters').length/2,
+                angle: scene.UIHandler.areas[card.getData('owner')].angle,
+                scale: 0.5,
                 duration: 500,
                 onComplete: () => {
+                    scene.children.sendToBack(card)
+                    card.setData('location', 'board')
                     resolve()
                     tween.remove()
                 }
@@ -67,22 +120,18 @@ export default class CardHandler {
         })
 
         this.moveToHeroArea = card => new Promise(resolve => {
-            let xSpread, ySpread, xPlus, yPlus
+            let xSpread, ySpread
             let heroArea = scene.UIHandler.areas[card.getData('owner')].heroArea
             switch (scene.UIHandler.areas[card.getData('owner')].angle) {
                 case 90:
                 case -90:
                     xSpread = 0
                     ySpread = card.displayWidth
-                    xPlus = card.displayHeight/2
-                    yPlus = card.displayWidth/2
                     break
                 case 180:
                 default:
                     xSpread = card.displayWidth
                     ySpread = 0
-                    xPlus = card.displayWidth/2
-                    yPlus = card.displayHeight/2
                     break
             }
             let tween = scene.tweens.add({
@@ -176,7 +225,10 @@ export default class CardHandler {
                 scale: 0.5,
                 duration: 500,
                 onComplete: () => {
-                    card.setData('location', 'discard')
+                    card.setData({
+                        location: 'discard',
+                        owner: null
+                    })
                     resolve()
                     tween.remove()
                 }
@@ -205,27 +257,28 @@ export default class CardHandler {
             })
         }
 
-        this.highlight = card => {
-            let glow0 = card.preFX.addGlow(0xffffff, 0, 0, false)//, 0.01, 64)
+        this.highlight = (card, color = 0xffffff) => new Promise(resolve => {
+            let glow0 = card.preFX.addGlow(color, 0, 0, false)//, 0.01, 64)
             let tween0 = scene.tweens.add({
                 targets: glow0,
                 outerStrength: 2,
                 duration: 200,
                 onComplete: () => {
                     
-                    let glow1 = card.preFX.addGlow(0xffffff, 0, 0, false)
+                    let glow1 = card.preFX.addGlow(color, 0, 0, false)
                     let tween1 = scene.tweens.add({
                         targets: glow1,
                         outerStrength: 2,
                         duration: 200,
                         onComplete: () => {
 
-                            let glow2 = card.preFX.addGlow(0xffffff, 0, 0, false)
+                            let glow2 = card.preFX.addGlow(color, 0, 0, false)
                             let tween2 = scene.tweens.add({
                                 targets: glow2,
                                 outerStrength: 2,
                                 duration: 200,
                                 onComplete: () => {
+                                    resolve()
                                     tween2.remove()
                                 }
                             })
@@ -235,7 +288,7 @@ export default class CardHandler {
                     tween0.remove()
                 }
             })
-        }
+        })
         
         this.flipCard = card => {
             if (card.getData('sprite') === card.texture.key) {
@@ -283,9 +336,7 @@ export default class CardHandler {
                     // angle: scene.UIHandler.areas[player].angle,
                     duration: 100,
                     onComplete: () => {
-                        if (i >= hand.cards.length-1) {
-                            resolve()
-                        }
+                        if (i >= hand.cards.length-1) resolve()
                         tween.remove()
                     }
                 })
@@ -344,6 +395,42 @@ export default class CardHandler {
             }
         })
        
+        this.sacrificeHero = card => new Promise(resolve => {
+            let heroArea = scene.UIHandler.areas[card.getData('owner')].heroArea
+
+            if (card.getData('item') && card.getData('item').getData('name') === 'Decoy Doll') {
+                scene.children.bringToTop(card.getData('item'))
+                this.highlight(card.getData('item'))
+                .then(() => this.moveToDiscard(card.getData('item')))
+                // this.moveToDiscard(card.getData('item'))
+                .then(() => {
+                    card.getData('item').preFX.clear()
+                    card.setData('item', null)
+                    resolve()
+                })
+
+            } else {
+                heroArea.data.list.heroes.splice(heroArea.data.list.heroes.indexOf(card), 1)
+                if (heroArea.getData('heroes').length) this.stackHeroes(card.getData('owner'))
+                if (card.getData('item')) {
+                    this.moveToDiscard(card.getData('item'))
+                    card.setData('item', null)
+                }
+                this.moveToDiscard(card)
+                .then(() => resolve())
+            }
+        })
+
+        this.discard = card => new Promise(resolve => {
+            let handArea = scene.UIHandler.areas[card.getData('owner')].handArea
+
+            handArea.cards.splice(handArea.cards.indexOf(card), 1)
+            if (handArea.cards.length) this.stackHand(card.getData('owner'))
+
+            this.moveToDiscard(card)
+            .then(() => resolve())
+        })
+
         // this.moveToGraveyard = (source, card, graveyard) => {
         //     card.first.play('discard')
         //     card.first.on('animationcomplete', () => {

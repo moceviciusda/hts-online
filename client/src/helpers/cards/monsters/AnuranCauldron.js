@@ -10,16 +10,9 @@ export default class AnuranCauldron extends MonsterCard {
             classRequirements: {}
         }
 
-        this.slay = () => {
-            console.log(this.name, 'slain')
-        }
-
-        this.defeat = () => {
-            console.log(this.name, 'defeat')
-        }
-
         this.checkSlay = roll => {
-            roll > 6 ? this.slay() : this.defeat()
+            if (roll > 6)   return 'success'
+            else            return 'fail'
         }
     }
 }

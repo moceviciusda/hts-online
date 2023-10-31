@@ -65,6 +65,7 @@ export default class InteractivityHandler {
 
         scene.input.on('pointerup', (event, gameObjects) => {
             console.log(gameObjects[0])
+            scene.UIHandler.destroyCardPreview()
             // Selecting Party Leader
             if (gameObjects.length) {
                 if (scene.GameHandler.gameState === 'partyLeaderSelection' && gameObjects[0].type === 'Image' && scene.GameHandler.currentTurn == scene.socket.id && gameObjects[0].getData('available')) { //&& scene.GameHandler.turn == scene.socket.id 
@@ -94,7 +95,7 @@ export default class InteractivityHandler {
 
                     if (gameObjects[0].getData('location') === 'hand') scene.children.bringToTop(gameObjects[0])
                     this.previewTimer = scene.time.delayedCall(500, () => {
-                        if (!this.isDragging) {
+                        if (!this.isDragging && scene.GameHandler.gameState === 'ready') {
                             scene.fadeBackground.setVisible(true)
                             scene.children.bringToTop(scene.fadeBackground)
                             if (gameObjects[0].getData('type') === 'hero') {
@@ -121,13 +122,9 @@ export default class InteractivityHandler {
                 //     scene.CardHandler.stickIn(gameObjects[0])
                 // }
                 scene.UIHandler.destroyCardPreview()
-                if (this.previewTimer) {
-                    this.previewTimer.remove()
-                }
+                if (this.previewTimer) this.previewTimer.remove()
                 
-                if (!this.isDragging) {
-                    scene.fadeBackground.setVisible(false)
-                }
+                if (!this.isDragging) scene.fadeBackground.setVisible(false)
             }
         })
 

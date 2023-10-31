@@ -14,14 +14,10 @@ export default class CrownedSerpent extends MonsterCard {
             console.log(this.name, 'slain')
         }
 
-        this.defeat = () => {
-            console.log(this.name, 'defeat')
-        }
-
         this.checkSlay = roll => {
-            if (roll >= 10) this.slay()
-            else if (roll <= 7) this.defeat()
-            else console.log(this.name, 'neutral')
+            if (roll >= 10)     return 'success'
+            else if (roll <= 7) return 'fail'
+            else                return 'neutral'
         }
     }
 }

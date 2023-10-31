@@ -201,8 +201,9 @@ export default class DeckHandler {
 
         this.dealMonster = name => {
             let monster = scene.DeckHandler.dealCard(scene.monsterArea.x+344-85, scene.monsterArea.y, name, null)
-            scene.CardHandler.moveToMonsterArea(monster)
+            // scene.CardHandler.moveToMonsterArea(monster)
             scene.monsterArea.data.list.cards.push(monster)
+            scene.CardHandler.stackMonsters()
         }        
         
         // this.discard = ()
