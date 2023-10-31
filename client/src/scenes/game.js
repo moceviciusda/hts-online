@@ -108,6 +108,9 @@ export default class Game extends Phaser.Scene {
         this.load.image('curseOfTheSnakesEyes', 'src/assets/cursed_items/Curse_of_the_Snakes_Eyes.png')
         this.load.image('sealingKey', 'src/assets/cursed_items/Sealing_Key.png')
         this.load.image('suspiciouslyShinyCoin', 'src/assets/cursed_items/Suspiciously_Shiny_Coin.png')
+
+        this.load.image('criticalBoost', 'src/assets/magic/Critical_Boost.png')
+        this.load.image('callToTheFallen', 'src/assets/magic/Call_to_the_Fallen.png')
     }
 
     create() {

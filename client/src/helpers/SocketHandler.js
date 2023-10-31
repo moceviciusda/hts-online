@@ -107,8 +107,9 @@ export default class SocketHandler {
                 scene.UIHandler.destroyChallengeView()
 
                 if (scene.GameHandler.currentTurn === scene.socket.id) {
-                    if (cardPlayed.getData('type') === 'hero') scene.socket.emit('heroPlayed', name, player)
-                    else if (cardPlayed.getData('type') === 'item')scene.socket.emit('itemEquiped', name, target, player)    
+                    if (cardPlayed.getData('type') === 'hero') scene.socket.emit('heroSummoned', name, player)
+                    else if (cardPlayed.getData('type') === 'item')scene.socket.emit('itemEquiped', name, target, player)
+                    else if (cardPlayed.getData('type') === 'magic')scene.socket.emit('magicCast', name, player)
                 }
                 scene.socket.removeAllListeners("challenged")
             })
@@ -176,7 +177,7 @@ export default class SocketHandler {
             })
         })
 
-        scene.socket.on('heroPlayed', (name, player) => {
+        scene.socket.on('heroSummoned', (name, player) => {
             let handArea = scene.UIHandler.areas[player].handArea
             let hero = handArea.cards.find(card => card.getData('name') === name && card.getData('playing'))
             
@@ -201,6 +202,18 @@ export default class SocketHandler {
             scene.CardHandler.equipItem(item, hero)
             .then(() => scene.CardHandler.stackHand(player))
         })
+
+        scene.socket.on('magicCast', (name, player) => {
+            let handArea = scene.UIHandler.areas[player].handArea
+            let magic = handArea.cards.find(card => card.getData('name') === name && card.getData('playing'))
+            
+            handArea.cards.splice(handArea.cards.indexOf(magic), 1)
+            magic.setData('playing', false)
+            magic.effect(player)
+            scene.CardHandler.moveToDiscard(magic)
+            .then(() => scene.CardHandler.stackHand(player))
+        })
+
 
         scene.socket.on('attacking', (monsterName, player) => {
             let monsterCard = scene.monsterArea.getData('cards').find(card => card.getData('name') === monsterName)

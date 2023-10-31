@@ -179,8 +179,9 @@ export default class CardHandler {
                 scale: 0.5,
                 duration: 300,
                 onComplete: () => {
-                    item.setData('location', 'board')
+                    item.setData({location: 'board', hero: hero})
                     hero.setData('item', item)
+                    if (item.getData('class')) hero.setData('class', item.getData('class'))
                     scene.children.bringToTop(hero)
                     resolve()
                     tween.remove()
@@ -413,8 +414,10 @@ export default class CardHandler {
                 heroArea.data.list.heroes.splice(heroArea.data.list.heroes.indexOf(card), 1)
                 if (heroArea.getData('heroes').length) this.stackHeroes(card.getData('owner'))
                 if (card.getData('item')) {
+                    card.setData('class', card.getData('originalClass'))
                     this.moveToDiscard(card.getData('item'))
                     card.setData('item', null)
+                    card.getData('item').setData('hero', null)
                 }
                 this.moveToDiscard(card)
                 .then(() => resolve())
@@ -428,7 +431,10 @@ export default class CardHandler {
             if (handArea.cards.length) this.stackHand(card.getData('owner'))
 
             this.moveToDiscard(card)
-            .then(() => resolve())
+            .then(() => {
+                if (card.texture.key === card.getData('backSprite')) this.flipCard(card)
+                resolve()
+            })
         })
 
         // this.moveToGraveyard = (source, card, graveyard) => {

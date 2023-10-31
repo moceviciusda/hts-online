@@ -6,5 +6,6 @@ export default class FighterMask extends Card {
         this.name = 'fighterMask'
         this.cardSprite = 'fighterMask'
         this.type = 'item'
+        this.class = 'fighter'
     }
 }

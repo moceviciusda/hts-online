@@ -88,6 +88,9 @@ import CurseOfTheSnakesEyes from "./cards/cursed_items/CurseOfTheSnakesEyes"
 import SealingKey from "./cards/cursed_items/SealingKey"
 import SuspiciouslyShinyCoin from "./cards/cursed_items/SuspiciouslyShinyCoin"
 
+import CallToTheFallen from "./cards/magic/CallToTheFallen"
+import CriticalBoost from "./cards/magic/CriticalBoost"
+
 
 export default class DeckHandler {
     constructor(scene){
@@ -185,6 +188,9 @@ export default class DeckHandler {
                 curseOfTheSnakesEyes: new CurseOfTheSnakesEyes(scene),
                 sealingKey: new SealingKey(scene),
                 suspiciouslyShinyCoin: new SuspiciouslyShinyCoin(scene), 
+
+                criticalBoost: new CriticalBoost(scene),
+                callToTheFallen: new CallToTheFallen(scene)
             }
             let newCard = cards[name]
 

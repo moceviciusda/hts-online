@@ -20,8 +20,9 @@ let monsterDeck = ['abyssQueen', 'anuranCauldron', 'arcticAries', 'bloodwing', '
 let monsters = []
 let baseHeroes = ['badAxe', 'bearClaw', 'bearyWise', 'furyKnuckle', 'heavyBear', 'panChucks', 'qiBear', 'toughTeddy', 'dodgyDealer', 'fuzzyCheeks', 'greedyCheeks', 'luckyBucky', 'mellowDee', 'nappingNibbles', 'peanut', 'tipsyTootie', 'calmingVoice', 'guidingLight', 'holyCurselifter', 'ironResolve', 'mightyBlade', 'radiantHorn', 'vibrantGlow', 'wiseShield', 'bullseye', 'hook', 'lookieRookie', 'quickDraw', 'seriousGrey', 'sharpFox', 'wildshot', 'wilyRed', 'kitNapper', 'meowzio', 'plunderingPuma', 'shurikitty', 'silentShadow', 'slipperyPaws', 'slyPickings', 'smoothMimimeow', 'bunBun', 'buttons', 'fluffy', 'hopper', 'snowball', 'spooky', 'whiskers', 'wiggles']
 let baseItems = ['bardMask', 'decoyDoll', 'fighterMask', 'guardianMask', 'particularlyRustyCoin', 'particularlyRustyCoin', 'rangerMask', 'reallyBigRing', 'reallyBigRing', 'thiefMask', 'wizardMask', 'curseOfTheSnakesEyes', 'curseOfTheSnakesEyes', 'sealingKey', 'suspiciouslyShinyCoin']
-let challenges = ['challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge']
-let deck = [].concat(baseHeroes, baseItems, challenges)
+let baseChallenges = ['challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge']
+let baseMagic = ['criticalBoost', 'criticalBoost']
+let deck = [].concat(baseHeroes, baseItems, baseChallenges, baseMagic)
 // deck = ['challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge']
 let discard = []
 let gameState = 'initializing'
@@ -212,11 +213,11 @@ io.on('connection', socket => {
         setGameState('ready')
     })
 
-    socket.on('heroPlayed', (name, socketId) => {
+    socket.on('heroSummoned', (name, socketId) => {
         console.log(socketId, 'played:', name)
         // players[socketId].hand.splice(players[socketId].hand.indexOf(name), 1)
         players[socketId].heroes.push(name)
-        io.emit('heroPlayed', name, socketId)
+        io.emit('heroSummoned', name, socketId)
         setGameState('ready')
     })
 
@@ -226,6 +227,14 @@ io.on('connection', socket => {
         // players[socketId].heroes.push(name)
         io.emit('itemEquiped', name, hero, socketId)
         setGameState('ready')
+    })
+
+    socket.on('magicCast', (name, socketId) => {
+        console.log(socketId, 'played:', name)
+        // players[socketId].hand.splice(players[socketId].hand.indexOf(name), 1)
+        discard.push(name)
+        setGameState('ready')
+        io.emit('magicCast', name, socketId)
     })
 
     socket.on('heroSacrificed', (heroName, socketId) => {

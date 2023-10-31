@@ -147,7 +147,7 @@ export default class InteractivityHandler {
                 scene.fadeBackground.setVisible(true)
                 scene.children.bringToTop(scene.fadeBackground)
                 scene.children.bringToTop(gameObject)
-                if (gameObject.getData('type') === 'hero') {
+                if (gameObject.getData('type') === 'hero' || gameObject.getData('type') === 'magic') {
                     this.highlightArray.push(this.UIHandler.ZoneHandler.renderOutline(scene.playerHeroArea, 0x00ffff))
                 } else if (gameObject.getData('type') === 'item') {
                     scene.UIHandler.heroesOnBoard().forEach(hero => {
@@ -184,12 +184,15 @@ export default class InteractivityHandler {
                 if (gameObject.getData('type') === 'hero' && dropZone === scene.playerHeroArea) {
                     dropped = true
                     emit = () => scene.socket.emit('cardPlayed', gameObject.getData('name'), null, scene.socket.id)
-                    // scene.socket.emit('heroPlayed', gameObject.getData('name'), scene.socket.id)
+                    // scene.socket.emit('heroSummoned', gameObject.getData('name'), scene.socket.id)
 
                 } else if (gameObject.getData('type') === 'item' && dropZone !== scene.playerHeroArea && !dropZone.getData('item')) {
                     dropped = true
                     emit = () => scene.socket.emit('cardPlayed', gameObject.getData('name'), dropZone.getData('name'), scene.socket.id)
                     // scene.socket.emit('itemEquiped', gameObject.getData('name'), dropZone.getData('name'), scene.socket.id)
+                } else if (gameObject.getData('type') === 'magic') {
+                    dropped = true
+                    emit = () => scene.socket.emit('cardPlayed', gameObject.getData('name'), null, scene.socket.id)
                 }
             } else if (scene.GameHandler.gameState === 'waitingForChallengers' && gameObject.getData('type') === 'challenge' && dropZone.getData('playing')) {
                 dropped = true

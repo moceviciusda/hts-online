@@ -6,5 +6,6 @@ export default class GuardianMask extends Card {
         this.name = 'guardianMask'
         this.cardSprite = 'guardianMask'
         this.type = 'item'
+        this.class = 'guardian'
     }
 }

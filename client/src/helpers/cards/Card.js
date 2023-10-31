@@ -17,11 +17,19 @@ export default class Card {
             })
             if (this.type === 'hero') {
                 card.setData({
+                    originalClass: this.class,
                     class: this.class,
                     item: null
                 })
+            } else if (this.type === 'item') {
+                card.setData({
+                    class: this.class,
+                    hero: null
+                })
             }
-            
+
+            if (this.effect) card.effect = this.effect
+
 
             if (owner === scene.socket.id) {
                 scene.input.setDraggable(card)
