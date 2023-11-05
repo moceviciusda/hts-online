@@ -66,8 +66,12 @@ export default class InteractivityHandler {
         scene.input.on('pointerup', (event, gameObjects) => {
             console.log(gameObjects[0])
             scene.UIHandler.destroyCardPreview()
-            // Selecting Party Leader
+
             if (gameObjects.length) {
+                if (scene.GameHandler.gameState === 'ready' && gameObjects[0].getData('location') === 'discard') {
+                    scene.UIHandler.buildCardSelectionView(scene.discardArea.getData('cards'))
+                }
+                // Selecting Party Leader
                 if (scene.GameHandler.gameState === 'partyLeaderSelection' && gameObjects[0].type === 'Image' && scene.GameHandler.currentTurn == scene.socket.id && gameObjects[0].getData('available')) { //&& scene.GameHandler.turn == scene.socket.id 
                     // Clear glow effect from previously selected leader
                     scene.children.list.forEach(gameObject => {

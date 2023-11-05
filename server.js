@@ -21,7 +21,7 @@ let monsters = []
 let baseHeroes = ['badAxe', 'bearClaw', 'bearyWise', 'furyKnuckle', 'heavyBear', 'panChucks', 'qiBear', 'toughTeddy', 'dodgyDealer', 'fuzzyCheeks', 'greedyCheeks', 'luckyBucky', 'mellowDee', 'nappingNibbles', 'peanut', 'tipsyTootie', 'calmingVoice', 'guidingLight', 'holyCurselifter', 'ironResolve', 'mightyBlade', 'radiantHorn', 'vibrantGlow', 'wiseShield', 'bullseye', 'hook', 'lookieRookie', 'quickDraw', 'seriousGrey', 'sharpFox', 'wildshot', 'wilyRed', 'kitNapper', 'meowzio', 'plunderingPuma', 'shurikitty', 'silentShadow', 'slipperyPaws', 'slyPickings', 'smoothMimimeow', 'bunBun', 'buttons', 'fluffy', 'hopper', 'snowball', 'spooky', 'whiskers', 'wiggles']
 let baseItems = ['bardMask', 'decoyDoll', 'fighterMask', 'guardianMask', 'particularlyRustyCoin', 'particularlyRustyCoin', 'rangerMask', 'reallyBigRing', 'reallyBigRing', 'thiefMask', 'wizardMask', 'curseOfTheSnakesEyes', 'curseOfTheSnakesEyes', 'sealingKey', 'suspiciouslyShinyCoin']
 let baseChallenges = ['challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge']
-let baseMagic = ['criticalBoost', 'criticalBoost']
+let baseMagic = ['criticalBoost', 'criticalBoost', 'callToTheFallen', 'callToTheFallen', 'callToTheFallen', 'callToTheFallen', 'callToTheFallen', 'callToTheFallen', 'callToTheFallen', 'callToTheFallen', 'callToTheFallen', 'callToTheFallen', 'callToTheFallen', 'callToTheFallen', 'callToTheFallen']
 let deck = [].concat(baseHeroes, baseItems, baseChallenges, baseMagic)
 // deck = ['challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge']
 let discard = []
@@ -100,6 +100,12 @@ io.on('connection', socket => {
 
     socket.on('ready', socketId => {
         shuffle(deck)
+        shuffle(deck)
+        shuffle(deck)
+        shuffle(deck)
+        shuffle(monsterDeck)
+        shuffle(monsterDeck)
+        shuffle(monsterDeck)
         shuffle(monsterDeck)
         io.emit('updateDeck', deck)
         console.log(players)

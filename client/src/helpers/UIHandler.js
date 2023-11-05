@@ -11,7 +11,7 @@ export default class UIHandler {
         this.buildCommonAreas = () => {
             scene.monsterArea = scene.add.rectangle(scene.scale.width/2 - 110, scene.scale.height/2, 688, 300).setStrokeStyle(4, 0xff69b4).setData('cards', [])
             scene.deckArea = scene.add.rectangle(1304, scene.scale.height/2+79, 158, 220).setAngle(-90).setStrokeStyle(4, 0xff69b4)
-            scene.discardArea = scene.add.rectangle(1304, scene.scale.height/2-79, 158, 220).setAngle(-90).setStrokeStyle(4, 0xff69b4)
+            scene.discardArea = scene.add.rectangle(1304, scene.scale.height/2-79, 158, 220).setAngle(-90).setStrokeStyle(4, 0xff69b4).setData('cards', [])
         }
 
         this.buildPlayerAreas = () => {
@@ -383,6 +383,80 @@ export default class UIHandler {
         this.destroyDiscardView = () => {
             if (scene.discardText) scene.discardText.destroy()
             scene.fadeBackground.setVisible(false)
+        }
+
+        this.buildCardSelectionView = (
+                cards,
+                count = 0,
+                text = '',
+                callback = null,
+            ) => {
+            let selectedCounter = 0
+            let cardsPerRow = 10
+            let rows = Math.ceil(cards.length / cardsPerRow)
+            
+            if (text.length) scene.UIHandler.alert(text)
+            scene.GameHandler.setGameState('viewingCards')
+            // scene.cardSelectionText = scene.add.text(scene.scale.width/2, 220, text)
+            // .setFontSize(72).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5)
+            scene.fadeBackground.setVisible(true)
+            scene.children.bringToTop(scene.fadeBackground)
+
+            if (count === 0 || !cards.length) {
+                // scene.GameHandler.setGameState('viewingCards')
+                scene.input.once('pointerup', () => {
+                    cards.forEach(card => card.removeAllListeners())
+                    this.destroyCardPreview()
+                    cards.forEach(card => scene.CardHandler.moveToDiscard(card))
+                    // scene.cardSelectionText.destroy()
+                    scene.fadeBackground.setVisible(false)
+                    scene.GameHandler.setGameState('ready')
+                })
+            }
+
+            for (let row = 0; row <= rows; row++) {
+                for (let column = 0; column < cardsPerRow; column++) {
+                    if (cards[row*cardsPerRow + column]) {
+                        let card = cards[row*cardsPerRow + column]
+
+                        console.log(card)
+                        let tween = scene.tweens.add({
+                            targets: card,
+                            x: scene.scale.width/2-card.displayWidth*5 + (card.displayWidth+16) * column,
+                            y: scene.scale.height/2-(rows-1)*(card.displayHeight/2+8) + (card.displayHeight+16) * row,
+                            angle: 0,
+                            scale: 0.5,
+                            duration: 500,
+                            onComplete: () => {
+                                tween.remove()
+                            }
+                        })
+
+                        scene.children.bringToTop(card)
+
+                        card.on('pointerover', () => this.buildCardPreview(card))
+                        card.on('pointerout', () => this.destroyCardPreview())
+                        if (count > 0) {
+                            card.once('pointerup', () => {
+                                // scene.socket.emit('discard', card.getData('name'), scene.socket.id)
+                                // this.destroyCardPreview()
+                                this.destroyCardPreview()
+                                
+                                selectedCounter++
+                                callback(card)
+                                .then(() => {
+                                    if (selectedCounter >= count) {
+                                        cards.forEach(h => h.removeAllListeners())
+                                        scene.fadeBackground.setVisible(false)
+                                        scene.GameHandler.setGameState('ready')
+                                    }
+                                })
+                            })
+                        }
+                    }
+                }
+            }
+            
         }
 
         this.buildUI = () => {

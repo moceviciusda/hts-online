@@ -86,6 +86,7 @@ export default class CardHandler {
 
         this.moveToHand = (card, owner) => new Promise(resolve => {
             let xSpread, ySpread
+            card.input.dropZone = false
             switch (scene.UIHandler.areas[owner].angle) {
                 case 90:
                     xSpread = 0
@@ -112,7 +113,11 @@ export default class CardHandler {
                 scale: 0.5,
                 duration: 300,
                 onComplete: () => {
-                    card.setData('location', 'hand')
+                    card.setData({
+                        location: 'hand',
+                        owner: owner
+                    })
+                    if (owner === scene.socket.id) scene.input.setDraggable(card, true)
                     resolve()
                     tween.remove()
                 }
@@ -218,6 +223,8 @@ export default class CardHandler {
 
         this.moveToDiscard = card => new Promise(resolve => {
             scene.children.bringToTop(card)
+            card.input.dropZone = false
+            // scene.discardArea.data.list.cards.push(card)
             let tween = scene.tweens.add({
                 targets: card,
                 x: scene.discardArea.x,
@@ -399,11 +406,13 @@ export default class CardHandler {
         this.sacrificeHero = card => new Promise(resolve => {
             let heroArea = scene.UIHandler.areas[card.getData('owner')].heroArea
 
-            if (card.getData('item') && card.getData('item').getData('name') === 'Decoy Doll') {
+            if (card.getData('item') && card.getData('item').getData('name') === 'decoyDoll') {
                 scene.children.bringToTop(card.getData('item'))
                 this.highlight(card.getData('item'))
-                .then(() => this.moveToDiscard(card.getData('item')))
-                // this.moveToDiscard(card.getData('item'))
+                .then(() => {
+                    scene.discardArea.data.list.cards.push(card.getData('item'))
+                    this.moveToDiscard(card.getData('item'))
+                })
                 .then(() => {
                     card.getData('item').preFX.clear()
                     card.setData('item', null)
@@ -415,10 +424,12 @@ export default class CardHandler {
                 if (heroArea.getData('heroes').length) this.stackHeroes(card.getData('owner'))
                 if (card.getData('item')) {
                     card.setData('class', card.getData('originalClass'))
+                    scene.discardArea.data.list.cards.push(card.getData('item'))
                     this.moveToDiscard(card.getData('item'))
-                    card.setData('item', null)
                     card.getData('item').setData('hero', null)
+                    card.setData('item', null)
                 }
+                scene.discardArea.data.list.cards.push(card)
                 this.moveToDiscard(card)
                 .then(() => resolve())
             }
@@ -429,7 +440,7 @@ export default class CardHandler {
 
             handArea.cards.splice(handArea.cards.indexOf(card), 1)
             if (handArea.cards.length) this.stackHand(card.getData('owner'))
-
+            scene.discardArea.data.list.cards.push(card)
             this.moveToDiscard(card)
             .then(() => {
                 if (card.texture.key === card.getData('backSprite')) this.flipCard(card)
@@ -437,16 +448,17 @@ export default class CardHandler {
             })
         })
 
-        // this.moveToGraveyard = (source, card, graveyard) => {
-        //     card.first.play('discard')
-        //     card.first.on('animationcomplete', () => {
-        //         scene.GraveyardHandler.discard(source, card, graveyard)
-        //         card.x = 200
-        //         card.y = 700
-        //         // card.alpha = 1
-        //         scene.input.setDraggable(card, false)
-        //         this.flipCard(card)
-        //     })
-        // }
+        this.previewDiscardPile = (cardType = null) => {
+            let cards
+            cardType ? cards = scene.discardArea.data.list.filter(card => card.getData('type') === cardType) : cards = scene.discardArea.data.list
+            let rows = Math.floor(cards / 9)
+
+            for (let row = 0; row <= rows; row++) {
+                
+            }
+
+        }
+        
+
     }
 }

@@ -54,7 +54,8 @@ export default class SocketHandler {
                         leader.destroy()
                     }
                 });
-                scene.DeckHandler.dealCard(scene.deckArea.x, scene.deckArea.y, 'cardBack', null).setAngle(-90)
+                scene.discardPile = scene.DeckHandler.dealCard(scene.deckArea.x, scene.deckArea.y, 'cardBack', null).setAngle(-90).setInteractive()
+                scene.discardPile.on('pointerup', () => scene.UIHandler.buildCardSelectionView(scene.discardArea.getData('cards')))
                 scene.DeckHandler.dealCard(scene.monsterArea.x+344-85, scene.monsterArea.y, 'monsterCardBack', null)
                 scene.UIHandler.buildGameText()
             }
@@ -153,6 +154,7 @@ export default class SocketHandler {
                 }))
                 .then(() => {
                     if (players[player].lastRoll.result1+players[player].lastRoll.result2 >= players[challenger].lastRoll.result1+players[challenger].lastRoll.result2) {
+                        scene.discardArea.data.list.cards.push(challengeCard)
                         scene.CardHandler.moveToDiscard(challengeCard)
                         .then(() => {
                             if (player === scene.socket.id) scene.socket.emit('challengeFailed')
@@ -163,9 +165,10 @@ export default class SocketHandler {
                         challengeCard.setData('playing', false)
                         handArea.cards.splice(handArea.cards.indexOf(cardPlayed), 1)
                         
-
+                        scene.discardArea.data.list.cards.push(cardPlayed)
                         scene.CardHandler.moveToDiscard(cardPlayed)
                         .then(() => scene.CardHandler.stackHand(player))
+                        scene.discardArea.data.list.cards.push(challengeCard)
                         scene.CardHandler.moveToDiscard(challengeCard)
                         .then(() => {
                             scene.socket.removeAllListeners("notChallenged")
@@ -210,6 +213,7 @@ export default class SocketHandler {
             handArea.cards.splice(handArea.cards.indexOf(magic), 1)
             magic.setData('playing', false)
             magic.effect(player)
+            scene.discardArea.data.list.cards.push(magic)
             scene.CardHandler.moveToDiscard(magic)
             .then(() => scene.CardHandler.stackHand(player))
         })
