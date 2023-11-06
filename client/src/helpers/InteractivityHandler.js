@@ -70,6 +70,7 @@ export default class InteractivityHandler {
             if (gameObjects.length) {
                 if (scene.GameHandler.gameState === 'ready' && gameObjects[0].getData('location') === 'discard') {
                     scene.UIHandler.buildCardSelectionView(scene.discardArea.getData('cards'))
+                    .then(cards => cards.forEach(card => scene.CardHandler.moveToDiscard(card)))
                 }
                 // Selecting Party Leader
                 if (scene.GameHandler.gameState === 'partyLeaderSelection' && gameObjects[0].type === 'Image' && scene.GameHandler.currentTurn == scene.socket.id && gameObjects[0].getData('available')) { //&& scene.GameHandler.turn == scene.socket.id 

@@ -111,6 +111,12 @@ export default class Game extends Phaser.Scene {
 
         this.load.image('criticalBoost', 'src/assets/magic/Critical_Boost.png')
         this.load.image('callToTheFallen', 'src/assets/magic/Call_to_the_Fallen.png')
+        this.load.image('destructiveSpell', 'src/assets/magic/Destructive_Spell.png')
+        this.load.image('enchantedSpell', 'src/assets/magic/Enchanted_Spell.png')
+        this.load.image('entanglingTrap', 'src/assets/magic/Entangling_Trap.png')
+        this.load.image('forcedExchange', 'src/assets/magic/Forced_Exchange.png')
+        this.load.image('forcefulWinds', 'src/assets/magic/Forceful_Winds.png')
+        this.load.image('windsOfChange', 'src/assets/magic/Winds_of_Change.png')
     }
 
     create() {

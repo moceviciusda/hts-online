@@ -90,12 +90,16 @@ import SuspiciouslyShinyCoin from "./cards/cursed_items/SuspiciouslyShinyCoin"
 
 import CallToTheFallen from "./cards/magic/CallToTheFallen"
 import CriticalBoost from "./cards/magic/CriticalBoost"
+import DestructiveSpell from "./cards/magic/DestructiveSpell"
+import EnchantedSpell from "./cards/magic/EnchantedSpell"
+import EntanglingTrap from "./cards/magic/EntanglingTrap"
+import ForcedExchange from "./cards/magic/ForcedExchange"
+import ForcefulWinds from "./cards/magic/ForcefulWinds"
+import WindsOfChange from "./cards/magic/WindsOfChange"
 
 
 export default class DeckHandler {
     constructor(scene){
-
-        // this.CardHandler = new CardHandler(scene)
 
         this.dealCard = (x, y, name, owner) => {
             let cards = {
@@ -190,7 +194,13 @@ export default class DeckHandler {
                 suspiciouslyShinyCoin: new SuspiciouslyShinyCoin(scene), 
 
                 criticalBoost: new CriticalBoost(scene),
-                callToTheFallen: new CallToTheFallen(scene)
+                callToTheFallen: new CallToTheFallen(scene),
+                destructiveSpell: new DestructiveSpell(scene),
+                enchantedSpell: new EnchantedSpell(scene),
+                entanglingTrap: new EntanglingTrap(scene),
+                forcedExchange: new ForcedExchange(scene),
+                forcefulWinds: new ForcefulWinds(scene),
+                windsOfChange: new WindsOfChange(scene)
             }
             let newCard = cards[name]
 

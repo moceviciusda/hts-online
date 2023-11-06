@@ -117,7 +117,13 @@ export default class CardHandler {
                         location: 'hand',
                         owner: owner
                     })
-                    if (owner === scene.socket.id) scene.input.setDraggable(card, true)
+                    if (owner === scene.socket.id) {
+                        scene.input.setDraggable(card, true)
+                        if (card.getData('backSprite') === card.texture.key) this.flipCard(card)
+                    } else {
+                        scene.input.setDraggable(card, false)
+                        if (card.getData('sprite') === card.texture.key) this.flipCard(card)
+                    }
                     resolve()
                     tween.remove()
                 }
@@ -184,7 +190,7 @@ export default class CardHandler {
                 scale: 0.5,
                 duration: 300,
                 onComplete: () => {
-                    item.setData({location: 'board', hero: hero})
+                    item.setData({location: 'board', hero: hero, owner: hero.getData('owner')})
                     hero.setData('item', item)
                     if (item.getData('class')) hero.setData('class', item.getData('class'))
                     scene.children.bringToTop(hero)
@@ -354,53 +360,55 @@ export default class CardHandler {
         this.stackHeroes = player => new Promise(resolve => {
             let xSpread, ySpread, x, y
             let heroArea = scene.UIHandler.areas[player].heroArea
-            switch (scene.UIHandler.areas[player].angle) {
-                case 90:
-                case -90:
-                    xSpread = 0
-                    ySpread = heroArea.getData('heroes')[0].displayWidth
-                    x = heroArea.x
-                    y = heroArea.y - ySpread*heroArea.getData('heroes').length/2
-                    break
-                case 180:
-                default:
-                    xSpread = heroArea.getData('heroes')[0].displayWidth
-                    ySpread = 0
-                    x = heroArea.x - xSpread*heroArea.getData('heroes').length/2
-                    y = heroArea.y
-                    break
-            }
-            for (let i=0; i<heroArea.getData('heroes').length; i++) {
-                let hero = heroArea.getData('heroes')[i]
-                // scene.children.bringToTop(hero)
-                let tween = scene.tweens.add({
-                    targets: hero,
-                    x: x + xSpread*(i+0.5),
-                    y: y + ySpread*(i+0.5),
-                    // angle: scene.UIHandler.areas[player].angle,
-                    duration: 100,
-                    onComplete: () => {
-                        if (i >= heroArea.getData('heroes').length-1) {
-                            resolve()
-                        }
-                        tween.remove()
-                    }
-                })
-                if (hero.getData('item')) {
-                    let item = hero.getData('item')
-                    let itemTween = scene.tweens.add({
-                        targets: item,
+            if (heroArea.getData('heroes').length) {
+                switch (scene.UIHandler.areas[player].angle) {
+                    case 90:
+                    case -90:
+                        xSpread = 0
+                        ySpread = heroArea.getData('heroes')[0].displayWidth
+                        x = heroArea.x
+                        y = heroArea.y - ySpread*heroArea.getData('heroes').length/2
+                        break
+                    case 180:
+                    default:
+                        xSpread = heroArea.getData('heroes')[0].displayWidth
+                        ySpread = 0
+                        x = heroArea.x - xSpread*heroArea.getData('heroes').length/2
+                        y = heroArea.y
+                        break
+                }
+                for (let i=0; i<heroArea.getData('heroes').length; i++) {
+                    let hero = heroArea.getData('heroes')[i]
+                    // scene.children.bringToTop(hero)
+                    let tween = scene.tweens.add({
+                        targets: hero,
                         x: x + xSpread*(i+0.5),
                         y: y + ySpread*(i+0.5),
                         // angle: scene.UIHandler.areas[player].angle,
                         duration: 100,
                         onComplete: () => {
-                            scene.CardHandler.equipItem(item, hero)
-                            itemTween.remove()
+                            if (i >= heroArea.getData('heroes').length-1) {
+                                resolve()
+                            }
+                            tween.remove()
                         }
                     })
+                    if (hero.getData('item')) {
+                        let item = hero.getData('item')
+                        let itemTween = scene.tweens.add({
+                            targets: item,
+                            x: x + xSpread*(i+0.5),
+                            y: y + ySpread*(i+0.5),
+                            // angle: scene.UIHandler.areas[player].angle,
+                            duration: 100,
+                            onComplete: () => {
+                                scene.CardHandler.equipItem(item, hero)
+                                itemTween.remove()
+                            }
+                        })
+                    }
                 }
-            }
+            } else resolve()
         })
        
         this.sacrificeHero = card => new Promise(resolve => {
@@ -448,17 +456,15 @@ export default class CardHandler {
             })
         })
 
-        this.previewDiscardPile = (cardType = null) => {
-            let cards
-            cardType ? cards = scene.discardArea.data.list.filter(card => card.getData('type') === cardType) : cards = scene.discardArea.data.list
-            let rows = Math.floor(cards / 9)
-
-            for (let row = 0; row <= rows; row++) {
-                
-            }
-
-        }
-        
+        this.pullFromDiscard = (card, player) => new Promise(resolve => {
+            scene.discardArea.data.list.cards.splice(scene.discardArea.data.list.cards.indexOf(card), 1)
+            scene.UIHandler.areas[player].handArea.cards.push(card)
+            scene.CardHandler.moveToHand(card, player)
+            .then(() => {
+                this.stackHand(player)
+                resolve()
+            })
+        })
 
     }
 }

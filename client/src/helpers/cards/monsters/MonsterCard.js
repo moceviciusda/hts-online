@@ -36,8 +36,14 @@ export default class MonsterCard {
             }
 
             this.defeat? card.defeat = this.defeat : card.defeat = player => {
-                if (scene.socket.id === player && scene.UIHandler.areas[player].heroArea.getData('heroes').length > 0) {
-                    scene.UIHandler.buildSacrificeHeroView(1)
+                let playerHeroArea = scene.UIHandler.areas[player].heroArea
+                if (scene.socket.id === player && playerHeroArea.getData('heroes').length > 0) {
+                    scene.UIHandler.buildBoardSelectView(
+                        playerHeroArea.getData('heroes'),
+                        1,
+                        'Sacrifice a Hero',
+                        hero => scene.socket.emit('heroSacrificed', hero.getData('name'), player)
+                    )
                 }
             }
 

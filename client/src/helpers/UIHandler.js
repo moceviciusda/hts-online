@@ -5,7 +5,7 @@ export default class UIHandler {
     constructor(scene) {
         this.ZoneHandler = new ZoneHandler(scene)
         this.DiceHandler = new DiceHandler(scene)
-
+        scene.cardPreviewList = []
         this.areas = {}
 
         this.buildCommonAreas = () => {
@@ -150,14 +150,13 @@ export default class UIHandler {
 
         this.buildCardPreview = card => {
             if (card.getData('item')) {
-                scene.itemPreview = scene.add.image(scene.scale.width/2, scene.scale.height/2+120, card.getData('item').getData('sprite')).setScale(1.5)
+                scene.cardPreviewList.push(scene.add.image(scene.scale.width/2, scene.scale.height/2+120, card.getData('item').getData('sprite')).setScale(1.5))
             }
-            scene.cardPreview = scene.add.image(scene.scale.width/2, scene.scale.height/2, card.getData('sprite')).setScale(1.5)
+            scene.cardPreviewList.push(scene.add.image(scene.scale.width/2, scene.scale.height/2, card.getData('sprite')).setScale(1.5))
         }
 
         this.destroyCardPreview = () => {
-            if (scene.cardPreview) scene.cardPreview.destroy()
-            if (scene.itemPreview) scene.itemPreview.destroy()
+            scene.cardPreviewList.forEach(item => item.destroy())
         }
 
         this.buildChallengeView = (playedCard, player) => {
@@ -308,46 +307,55 @@ export default class UIHandler {
             scene.fadeBackground.setVisible(false)
         }
 
-        this.buildSacrificeHeroView = count => {
-            let heroes = scene.UIHandler.areas[scene.socket.id].heroArea.getData('heroes')
-            let sacrificeCounter = 0
-            if (count > heroes.length) sacrificeCounter += count - heroes.length
-            if (heroes.length > 0) {
-                scene.socket.emit('setGameState', 'sacrificing')
+        this.buildBoardSelectView = (
+            cards,
+            count,
+            text = '',
+            callback = null
+            ) => new Promise(resolve => {
 
-                scene.fadeBackground.setVisible(true)
-                scene.children.bringToTop(scene.fadeBackground)
+                let selectedCounter = 0
+                if (cards.length > 0) {
+                    let list = [...cards]
+                    scene.socket.emit('setGameState', 'selecting')
+                    scene.fadeBackground.setVisible(true)
+                    scene.children.bringToTop(scene.fadeBackground)
+                    scene.boardSelectText = scene.add.text(scene.scale.width/2, 220, text)
+                    .setFontSize(72).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5)
 
-                scene.sacrificeText = scene.add.text(scene.scale.width/2, 220, `Sacrifice ${count} Hero(es)`)
-                .setFontSize(72).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5)
-         
-                heroes.forEach(hero => {
-                    if (hero.getData('item')) scene.children.bringToTop(hero.getData('item'))
-                    scene.children.bringToTop(hero)
+                    if (count > cards.length) selectedCounter += count - cards.length
+                    cards.forEach(card => {
+                        if (card.getData('item')) scene.children.bringToTop(card.getData('item'))
+                        scene.children.bringToTop(card)
 
-                    hero.on('pointerover', () => this.buildCardPreview(hero))
-                    hero.on('pointerout', () => this.destroyCardPreview())
-                    hero.once('pointerup', () => {
-                        scene.socket.emit('heroSacrificed', hero.getData('name'), scene.socket.id)
-                        sacrificeCounter++
-                        if (sacrificeCounter >= count || heroes.length <= 0) {
-                            heroes.forEach(h => h.removeAllListeners())
-                            this.destroySacrificeHeroView()
-                            scene.socket.emit('setGameState', 'ready')
-                        }
+                        card.on('pointerover', () => this.buildCardPreview(card))
+                        card.on('pointerout', () => this.destroyCardPreview())
+                        card.once('pointerup', () => {
+                            list.splice(list.indexOf(card), 1)
+                            card.setData('selected', true)
+                            selectedCounter++
+                            callback(card)
+
+                            if (selectedCounter >= count || list.length <= 0) {
+                                cards.forEach(h => h.removeAllListeners())
+                                this.destroyBoardSelectView()
+                                scene.socket.emit('setGameState', 'ready')
+                                resolve(list)
+                            }
+                        })
                     })
-                })
-            } else {
-                scene.socket.emit('setGameState', 'ready')
-            }
-        }
+                } else {
+                    scene.socket.emit('setGameState', 'ready')
+                    resolve()
+                }
+        })
 
-        this.destroySacrificeHeroView = () => {
-            if (scene.sacrificeText) scene.sacrificeText.destroy()
+        this.destroyBoardSelectView = () => {
+            if (scene.boardSelectText) scene.boardSelectText.destroy()
             scene.fadeBackground.setVisible(false)
         }
 
-        this.buildDiscardView = count => {
+        this.buildDiscardView = count => new Promise(resolve => {
             let hand = scene.UIHandler.areas[scene.socket.id].handArea.cards
             let discardCounter = 0
             if (count > hand.length) discardCounter += count - hand.length
@@ -366,19 +374,20 @@ export default class UIHandler {
                     card.on('pointerover', () => this.buildCardPreview(card))
                     card.on('pointerout', () => this.destroyCardPreview())
                     card.once('pointerup', () => {
+                        card.setData('selected', true)
                         scene.socket.emit('discard', card.getData('name'), scene.socket.id)
                         discardCounter++
                         if (discardCounter >= count) {
                             hand.forEach(h => h.removeAllListeners())
                             this.destroyDiscardView()
-                            scene.socket.emit('setGameState', 'ready')
+                            resolve()
                         }
                     })
                 })
             } else {
-                scene.socket.emit('setGameState', 'ready')
+                resolve()
             }
-        }
+        })
 
         this.destroyDiscardView = () => {
             if (scene.discardText) scene.discardText.destroy()
@@ -390,11 +399,12 @@ export default class UIHandler {
                 count = 0,
                 text = '',
                 callback = null,
-            ) => {
+            ) => new Promise (resolve => {
             let selectedCounter = 0
             let cardsPerRow = 10
             let rows = Math.ceil(cards.length / cardsPerRow)
-            
+            let list = [...cards]
+
             if (text.length) scene.UIHandler.alert(text)
             scene.GameHandler.setGameState('viewingCards')
             // scene.cardSelectionText = scene.add.text(scene.scale.width/2, 220, text)
@@ -402,15 +412,13 @@ export default class UIHandler {
             scene.fadeBackground.setVisible(true)
             scene.children.bringToTop(scene.fadeBackground)
 
-            if (count === 0 || !cards.length) {
-                // scene.GameHandler.setGameState('viewingCards')
+            if (count === 0 || cards.length <= 0) {
                 scene.input.once('pointerup', () => {
                     cards.forEach(card => card.removeAllListeners())
                     this.destroyCardPreview()
-                    cards.forEach(card => scene.CardHandler.moveToDiscard(card))
-                    // scene.cardSelectionText.destroy()
                     scene.fadeBackground.setVisible(false)
                     scene.GameHandler.setGameState('ready')
+                    resolve(cards)
                 })
             }
 
@@ -438,26 +446,25 @@ export default class UIHandler {
                         card.on('pointerout', () => this.destroyCardPreview())
                         if (count > 0) {
                             card.once('pointerup', () => {
-                                // scene.socket.emit('discard', card.getData('name'), scene.socket.id)
-                                // this.destroyCardPreview()
+                                list.splice(list.indexOf(card), 1)
+                                card.setData('selected', true)
                                 this.destroyCardPreview()
-                                
                                 selectedCounter++
                                 callback(card)
-                                .then(() => {
-                                    if (selectedCounter >= count) {
-                                        cards.forEach(h => h.removeAllListeners())
-                                        scene.fadeBackground.setVisible(false)
-                                        scene.GameHandler.setGameState('ready')
-                                    }
-                                })
+                                
+                                if (selectedCounter >= count || list.length <= 0) {
+                                    cards.forEach(h => h.removeAllListeners())
+                                    scene.fadeBackground.setVisible(false)
+                                    resolve(list)
+                                }
+                                
                             })
                         }
                     }
                 }
             }
             
-        }
+        })
 
         this.buildUI = () => {
             this.buildCommonAreas()

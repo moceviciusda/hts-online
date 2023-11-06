@@ -13,6 +13,7 @@ export default class Orthus extends MonsterCard {
         this.defeat = player => {
             if (scene.socket.id === player) {
                 scene.UIHandler.buildDiscardView(2)
+                .then(() => scene.socket.emit('setGameState', 'ready'))
             }
         }
         

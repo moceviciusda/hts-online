@@ -14,13 +14,12 @@ export default class CallToTheFallen extends Card {
                     scene.discardArea.getData('cards').filter(dCard => dCard.getData('type') === 'hero'),
                     1,
                     'Pick a Hero',
-                    card => new Promise(resolve => {
-                        scene.discardArea.data.list.cards.splice(scene.discardArea.data.list.cards.indexOf(card), 1)
-                        scene.UIHandler.areas[player].handArea.cards.push(card)
-                        scene.CardHandler.moveToHand(card, player)
-                        .then(() => resolve())
-                    })
+                    card => scene.socket.emit('pullFromDiscard', card.getData('name'), player)
                 )
+                .then(cards => {
+                    cards.forEach(card => scene.CardHandler.moveToDiscard(card))
+                    scene.time.delayedCall(500, () => scene.GameHandler.setGameState('ready'))
+                })
             }
         }
     }

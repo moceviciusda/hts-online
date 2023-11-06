@@ -21,7 +21,7 @@ let monsters = []
 let baseHeroes = ['badAxe', 'bearClaw', 'bearyWise', 'furyKnuckle', 'heavyBear', 'panChucks', 'qiBear', 'toughTeddy', 'dodgyDealer', 'fuzzyCheeks', 'greedyCheeks', 'luckyBucky', 'mellowDee', 'nappingNibbles', 'peanut', 'tipsyTootie', 'calmingVoice', 'guidingLight', 'holyCurselifter', 'ironResolve', 'mightyBlade', 'radiantHorn', 'vibrantGlow', 'wiseShield', 'bullseye', 'hook', 'lookieRookie', 'quickDraw', 'seriousGrey', 'sharpFox', 'wildshot', 'wilyRed', 'kitNapper', 'meowzio', 'plunderingPuma', 'shurikitty', 'silentShadow', 'slipperyPaws', 'slyPickings', 'smoothMimimeow', 'bunBun', 'buttons', 'fluffy', 'hopper', 'snowball', 'spooky', 'whiskers', 'wiggles']
 let baseItems = ['bardMask', 'decoyDoll', 'fighterMask', 'guardianMask', 'particularlyRustyCoin', 'particularlyRustyCoin', 'rangerMask', 'reallyBigRing', 'reallyBigRing', 'thiefMask', 'wizardMask', 'curseOfTheSnakesEyes', 'curseOfTheSnakesEyes', 'sealingKey', 'suspiciouslyShinyCoin']
 let baseChallenges = ['challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge']
-let baseMagic = ['criticalBoost', 'criticalBoost', 'callToTheFallen', 'callToTheFallen', 'callToTheFallen', 'callToTheFallen', 'callToTheFallen', 'callToTheFallen', 'callToTheFallen', 'callToTheFallen', 'callToTheFallen', 'callToTheFallen', 'callToTheFallen', 'callToTheFallen', 'callToTheFallen']
+let baseMagic = ['callToTheFallen', 'criticalBoost', 'criticalBoost', 'destructiveSpell', 'destructiveSpell', 'enchantedSpell', 'enchantedSpell', 'entanglingTrap', 'entanglingTrap', 'forcedExchange', 'forcefulWinds', 'windsOfChange', 'windsOfChange']
 let deck = [].concat(baseHeroes, baseItems, baseChallenges, baseMagic)
 // deck = ['challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge']
 let discard = []
@@ -243,11 +243,11 @@ io.on('connection', socket => {
         io.emit('magicCast', name, socketId)
     })
 
-    socket.on('heroSacrificed', (heroName, socketId) => {
-        players[socketId].heroes.splice(players[socketId].heroes.indexOf(heroName), 1)
+    socket.on('heroSacrificed', (heroName, player) => {
+        players[player].heroes.splice(players[player].heroes.indexOf(heroName), 1)
         discard.push(heroName)
-        io.emit('heroSacrificed', heroName, socketId)
-        console.log(socketId, 'sacrificed', heroName)
+        io.emit('heroSacrificed', heroName, player)
+        console.log(player, 'sacrificed', heroName)
     })
 
     socket.on('discard', (cardName, socketId) => {
@@ -255,6 +255,27 @@ io.on('connection', socket => {
         discard.push(cardName)
         io.emit('discard', cardName, socketId)
         console.log(socketId, 'discarded', cardName)
+    })
+
+    socket.on('unequipItem', (heroName, player) => {
+        // discard.splice(discard.indexOf(cardName), 1)
+        // players[player].hand.push(cardName)
+        io.emit('unequipItem', heroName, player)
+        console.log('Item unequiped from', player, "'s", heroName)
+    })
+
+    socket.on('pullFromDiscard', (cardName, player) => {
+        discard.splice(discard.indexOf(cardName), 1)
+        players[player].hand.push(cardName)
+        io.emit('pullFromDiscard', cardName, player)
+        console.log(player, 'pulled', cardName, 'from discard pile')
+    })
+
+    socket.on('heroStolen', (cardName, cardOwner, player) => {
+        players[cardOwner].heroes.splice(players[cardOwner].heroes.indexOf(cardName), 1)
+        players[player].heroes.push(cardName)
+        io.emit('heroStolen', cardName, cardOwner, player)
+        console.log(player, 'stole', cardName, 'from', cardOwner)
     })
 
     socket.on('diceRoll', socketId => {

@@ -13,8 +13,10 @@ export default class CriticalBoost extends Card {
                 let listener = () => {
                     drawCounter++
                     if (drawCounter >= 3) {
-                        scene.UIHandler.buildDiscardView(1)
                         scene.socket.off('drawCard', listener)
+                        scene.UIHandler.buildDiscardView(1)
+                        .then(() => scene.socket.emit('setGameState', 'ready'))
+                        
                     }
                 }
 

@@ -268,16 +268,65 @@ export default class SocketHandler {
 
         scene.socket.on('heroSacrificed', (heroName, player) => {
             let hero = scene.UIHandler.areas[player].heroArea.data.list.heroes.find(card => card.getData('name') === heroName)
+            hero.setData('selected', false)
             scene.CardHandler.sacrificeHero(hero)
         })
         
+        scene.socket.on('heroStolen', (heroName, heroOwner, player) => {
+            let hero = scene.UIHandler.areas[heroOwner].heroArea.data.list.heroes.find(card => card.getData('name') === heroName)
+            hero.setData({
+                selected: false,
+                owner: player
+            })
+            scene.UIHandler.areas[heroOwner].heroArea.data.list.heroes.splice(scene.UIHandler.areas[heroOwner].heroArea.data.list.heroes.indexOf(hero), 1)
+            scene.UIHandler.areas[player].heroArea.data.list.heroes.push(hero)
+
+            scene.CardHandler.moveToHeroArea(hero)
+            .then(() => {
+                scene.CardHandler.stackHeroes(heroOwner)
+                scene.CardHandler.stackHeroes(player)
+            })
+        })
+
         scene.socket.on('discard', (cardName, player) => {
-            let card = scene.UIHandler.areas[player].handArea.cards.find(card => card.getData('name') === cardName)
+            let card
+            if (player === scene.socket.id) {
+                card = scene.UIHandler.areas[player].handArea.cards.find(card => card.getData('name') === cardName && card.getData('selected'))
+            } else {
+                card = scene.UIHandler.areas[player].handArea.cards.find(card => card.getData('name') === cardName)
+            }
+            card.setData('selected', false)
             scene.CardHandler.discard(card)
-            // .then(() => {
-            //     scene.UIHandler.destroyDiscardView()
-            //     if (scene.socket.id === player) scene.socket.emit('setGameState', 'ready')
-            // })
+        })
+
+        scene.socket.on('pullFromDiscard', (cardName, player) => {
+            let card
+            if (player === scene.socket.id) {
+                card = scene.discardArea.getData('cards').find(card => card.getData('name') === cardName && card.getData('selected'))
+            } else {
+                card = scene.discardArea.getData('cards').find(card => card.getData('name') === cardName)
+            }
+            card.setData('selected', false)
+            scene.CardHandler.pullFromDiscard(card, player)
+        })
+
+        scene.socket.on('unequipItem', (heroName, player) => {
+            let heroCard = scene.UIHandler.areas[player].heroArea.data.list.heroes.find(heroCard => heroCard.getData('name') === heroName)
+            let itemCard = heroCard.getData('item')
+
+            heroCard.setData({
+                class: heroCard.getData('originalClass'),
+                item: null
+            })
+            itemCard.setData({
+                hero: null,
+                location: 'hand'
+            })
+
+            scene.UIHandler.areas[player].handArea.cards.push(itemCard)
+            scene.CardHandler.moveToHand(itemCard, player)
+            .then(() => scene.CardHandler.stackHand(player))
+            
         })
     }
 }
