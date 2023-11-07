@@ -86,6 +86,100 @@ export default class DiceHandler {
                 }
             })
         }
+
+        this.buildDice = (x, y) => {
+            let valueText = scene.add.text(x, y, '0', { fontFamily: 'Arial Black', fontSize: 98, color: '#c51b7d' })
+            valueText.setStroke('#de77ae', 16).setScale(0).setOrigin(0.5).setData('diceValueText', true);
+            return {
+                x: x,
+                y: y,
+                valueText: valueText,
+                dice1: this.createDice(x - 65, y),
+                dice2: this.createDice(x + 65, y)
+                }
+        }
+        
+        this.destroyDice = () => {
+            let destroyList = []
+            scene.children.list.forEach(gameObject => {
+                if (gameObject.type === 'Mesh' || gameObject.getData('diceValueText')) {
+                    destroyList.push(gameObject)
+                }
+            })
+            destroyList.forEach(dice => dice.destroy())
+        }
+
+
+        this.rollDice = (dice, result1, result2) => new Promise(resolve => {
+            dice.dice1(result1)
+            .then(() => dice.dice2(result2))
+            .then(() => {
+                dice.valueText.text = result1+result2
+                scene.children.bringToTop(dice.valueText)
+                let tween = scene.add.tween({
+                    targets: dice.valueText,
+                    scale: 1,
+                    duration: 1000,
+                    ease: Phaser.Math.Easing.Bounce.Out,
+                    onComplete: () => {
+                        resolve(result1 + result2)
+                        tween.destroy()
+                    }
+                })
+            })
+        })
+
+        this.changeValue = (dice, value) => new Promise(resolve => {
+            let modificationText = scene.add.text(dice.x, dice.y, '', { fontFamily: 'Arial Black', fontSize: 98 }).setScale(0).setOrigin(0.5)
+            value < 0 ? modificationText.setText(value).setColor('#ff0000').setStroke('#700101', 16) : modificationText.setText(`+ ${value}`).setColor('#3ee64f').setStroke('#1d7026', 16)
+
+            scene.children.bringToTop(dice.valueText)
+            let shrinkTween = scene.add.tween({
+                targets: dice.valueText,
+                scale: 0,
+                duration: 500,
+
+                onComplete: () => {
+                    dice.valueText.text = parseInt(dice.valueText.text) + value
+
+                    let modificationInTween = scene.add.tween({
+                        targets: modificationText,
+                        scale: 1,
+                        duration: 1000,
+                        ease: Phaser.Math.Easing.Bounce.Out,
+                        onComplete: () => {
+                            let modificationOutTween = scene.add.tween({
+                                targets: modificationText,
+                                scale: 0,
+                                duration: 500,
+                                // ease: Phaser.Math.Easing.Bounce.Out,
+                                onComplete: () => {
+                                    modificationText.destroy()
+                                    
+                                    let popTween = scene.add.tween({
+                                        targets: dice.valueText,
+                                        scale: 1,
+                                        duration: 1000,
+                                        ease: Phaser.Math.Easing.Bounce.Out,
+                                        onComplete: () => {
+                                            resolve(dice.valueText.text)
+                                            popTween.destroy()
+                                        }
+                                    })
+                                    
+                                    modificationOutTween.destroy()
+                                }
+                            })
+
+                            modificationInTween.destroy()
+                        }
+                    })
+
+                    shrinkTween.destroy()
+                }
+            })
+        })
+
         
     }
 }

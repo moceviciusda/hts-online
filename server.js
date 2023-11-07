@@ -56,7 +56,7 @@ let drawCard = player => {
     players[player].hand.push(card)
     console.log(player, 'drawn:', card)
     io.emit('drawCard', card, player)
-    io.emit('updatePlayers', players)
+    // io.emit('updatePlayers', players)
     io.emit('updateDeck', deck)
 }
 
@@ -146,6 +146,7 @@ io.on('connection', socket => {
     })
 
     socket.on('cardPlayed', (name, target, socketId) => {
+        reactCount = 0
         console.log(socketId, 'attempting to play:', name, 'on', target)
         players[socketId].hand.splice(players[socketId].hand.indexOf(name), 1)
         // players[socketId].heroes.push(name)

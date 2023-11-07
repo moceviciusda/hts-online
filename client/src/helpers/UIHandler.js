@@ -204,66 +204,14 @@ export default class UIHandler {
         }
 
         this.destroyChallengeView = () => {
-            scene.UIHandler.areas[scene.socket.id].handArea.cards.forEach(card => {
-                if (card.getData('type') === 'challenge') {
-                    card.preFX.clear()
-                }
-            })
+            scene.children.list.filter(gameObject => gameObject.getData('type') === 'challenge')
+            .forEach(challengeCard => challengeCard.preFX.clear())
+
             scene.fadeBackground.setVisible(false)
             scene.challengeText.destroy()
             scene.dontChallengeText.destroy()
-            this.destroyDice()
+            this.DiceHandler.destroyDice()
         }
-
-        this.buildDice = (x, y) => {
-            let valueText = scene.add.text(x, y, '0', { fontFamily: 'Arial Black', fontSize: 98, color: '#c51b7d' })
-            valueText.setStroke('#de77ae', 16).setScale(0).setOrigin(0.5).setData('diceValueText', true);
-            return {
-                x: x,
-                y: y,
-                valueText: valueText,
-                dice1: this.DiceHandler.createDice(x - 65, y),
-                dice2: this.DiceHandler.createDice(x + 65, y)
-                }
-        }
-        
-        this.destroyDice = () => {
-            let destroyList = []
-            scene.children.list.forEach(gameObject => {
-                if (gameObject.type === 'Mesh' || gameObject.getData('diceValueText')) {
-                    destroyList.push(gameObject)
-                }
-            })
-            destroyList.forEach(dice => dice.destroy())
-        }
-
-
-        this.rollDice = (dice, result1, result2) => new Promise(resolve => {
-            dice.dice1(result1)
-            .then(() => dice.dice2(result2))
-            .then(() => {
-                dice.valueText.text = result1+result2;
-                scene.children.bringToTop(dice.valueText)
-                let tween = scene.add.tween({
-                    targets: dice.valueText,
-                    scale: 1,
-                    duration: 1000,
-                    ease: Phaser.Math.Easing.Bounce.Out,
-                    onComplete: () => {
-                        resolve(result1 + result2)
-                        // scene.add.tween({
-                        //     targets: textDiceValue,
-                        //     scale: 0,
-                        //     delay: 1000,
-                        //     duration: 1000,
-                        //     ease: Phaser.Math.Easing.Bounce.Out,
-                        //     onComplete: () => resolve()
-                        // });
-                        tween.destroy()
-                    }
-                });
-            })
-        })
 
         this.buildAttackView = (monsterCard, player) => new Promise(resolve => {
             let partyLeaderCard = this.areas[player].leaderArea.getData('card')
@@ -356,7 +304,7 @@ export default class UIHandler {
         }
 
         this.buildDiscardView = count => new Promise(resolve => {
-            let hand = scene.UIHandler.areas[scene.socket.id].handArea.cards
+            let hand = scene.UIHandler.areas[scene.socket.id].handArea.cards.filter(card => !card.getData('playing'))
             let discardCounter = 0
             if (count > hand.length) discardCounter += count - hand.length
             if (hand.length > 0) {
@@ -472,9 +420,7 @@ export default class UIHandler {
             this.buildOpponentAreas()
             scene.fadeBackground = scene.add.graphics()
             scene.fadeBackground.fillStyle(0x000000, 0.9).fillRect(0, 0, 1920, 1080)
-            // this.buildDice()
-            // this.hideDice()
-            // this.buildGameText()
+
         }
     }
 }

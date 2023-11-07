@@ -24,21 +24,6 @@ export default class InteractivityHandler {
                     scene.socket.emit('drawCard', scene.socket.id)
                 }
             })
-
-            scene.rollDice.on('pointerover', () => scene.rollDice.setColor('#ff69b4'))
-            scene.rollDice.on('pointerout', () => scene.rollDice.setColor('#00ffff'))
-            scene.rollDice.on('pointerup', () => {
-                if (scene.GameHandler.currentTurn === scene.socket.id) {
-                    // let dice = scene.UIHandler.buildDice(500, 500)
-                    
-                    // scene.UIHandler.rollDice(dice, 4, 5)
-                    // scene.UIHandler.showDice()
-                    scene.socket.emit('diceRoll', scene.socket.id)
-
-                    // scene.drawCard.disableInteractive()
-                    // scene.socket.emit('drawCard', scene.socket.id)
-                }
-            })
         }
 
         this.challengeInteractivity = () => {
@@ -202,7 +187,22 @@ export default class InteractivityHandler {
             } else if (scene.GameHandler.gameState === 'waitingForChallengers' && gameObject.getData('type') === 'challenge' && dropZone.getData('playing')) {
                 dropped = true
                 gameObject.preFX.clear()
-                emit = () => scene.socket.emit('challenged', gameObject.getData('name'), scene.socket.id)
+                // If challenge target has slain Bloodwing
+                if (scene.UIHandler.areas[dropZone.getData('owner')].slayArea.getData('monsters').find(monster => monster.getData('name') === 'bloodwing')) {
+                    let bloodwingCard = scene.UIHandler.areas[dropZone.getData('owner')].slayArea.getData('monsters').find(monster => monster.getData('name') === 'bloodwing')
+                    emit = () => {
+                        scene.children.bringToTop(bloodwingCard)
+                        scene.CardHandler.highlight(bloodwingCard)
+                        .then(() => {
+                            bloodwingCard.preFX.clear()
+                            scene.children.sendToBack(bloodwingCard)
+                            scene.UIHandler.buildDiscardView(1)
+                            .then(() => {
+                                scene.time.delayedCall(500, () => scene.socket.emit('challenged', gameObject.getData('name'), scene.socket.id))
+                            })
+                        })      
+                    }
+                } else  emit = () => scene.socket.emit('challenged', gameObject.getData('name'), scene.socket.id)
             }
 
             if (dropped) {

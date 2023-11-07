@@ -107,8 +107,8 @@ export default class CardHandler {
             }
             let tween = scene.tweens.add({
                 targets: card,
-                x: scene.UIHandler.areas[owner].handArea.x + xSpread*scene.GameHandler.players[owner].hand.length/2,
-                y: scene.UIHandler.areas[owner].handArea.y + ySpread*scene.GameHandler.players[owner].hand.length/2,
+                x: scene.UIHandler.areas[owner].handArea.x + xSpread*scene.UIHandler.areas[owner].handArea.cards.length/2,
+                y: scene.UIHandler.areas[owner].handArea.y + ySpread*scene.UIHandler.areas[owner].handArea.cards.length/2,
                 angle: scene.UIHandler.areas[owner].angle,
                 scale: 0.5,
                 duration: 300,
@@ -283,14 +283,14 @@ export default class CardHandler {
                     let tween1 = scene.tweens.add({
                         targets: glow1,
                         outerStrength: 2,
-                        duration: 200,
+                        duration: 400,
                         onComplete: () => {
 
                             let glow2 = card.preFX.addGlow(color, 0, 0, false)
                             let tween2 = scene.tweens.add({
                                 targets: glow2,
                                 outerStrength: 2,
-                                duration: 200,
+                                duration: 600,
                                 onComplete: () => {
                                     resolve()
                                     tween2.remove()
@@ -464,6 +464,46 @@ export default class CardHandler {
                 this.stackHand(player)
                 resolve()
             })
+        })
+
+        this.modifyRoll = (dice, card, value) => new Promise(resolve => {
+            let initialX = card.x
+            let initialY = card.y
+            let initialAngle = card.angle
+            let initialScale = card.scale
+
+            scene.children.bringToTop(card)
+
+            let toDiceTween = scene.tweens.add({
+                targets: card,
+                x: dice.x,
+                y: dice.y,
+                angle: 0,
+                scale: 1,
+                duration: 500,
+                onComplete: () => {
+                    let shrinkTween = scene.tweens.add({
+                        targets: card,
+                        angle: 720,
+                        scale: 0,
+                        duration: 1000,
+                        onComplete: () => {
+                            card.x = initialX
+                            card.y = initialY
+                            card.setAngle(initialAngle).setScale(initialScale)
+                            scene.children.sendToBack(card)
+
+                            scene.UIHandler.DiceHandler.changeValue(dice, value)
+                            .then(value => resolve(value))
+
+                            shrinkTween.remove()
+                        }
+                    })
+                    
+                    toDiceTween.remove()
+                }
+            })
+
         })
 
     }

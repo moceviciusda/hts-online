@@ -16,6 +16,10 @@ export default class GameHandler {
 
         this.updatePlayers = players => {
             this.players = players
+            for (let player in this.players) {
+                this.players[player].modifiers.passive = []
+                this.players[player].modifiers.turn = []
+            }
             console.log('Players Updated: ', this.players)
         }
 

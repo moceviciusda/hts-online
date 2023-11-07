@@ -116,6 +116,7 @@ export default class SocketHandler {
             })
 
             scene.socket.once('challenged', (challengeName, challenger) => {
+                let playerResult, challengerResult
                 let players = scene.GameHandler.players
                 let challengerHandArea = scene.UIHandler.areas[challenger].handArea
                 let challengeCard, challengerDice, playerDice
@@ -131,20 +132,24 @@ export default class SocketHandler {
                 }
                 
                 scene.CardHandler.moveToChallenge(challengeCard, cardPlayed)
+                // initial challenge Rolls
                 .then(() => new Promise(resolve => {
                     scene.UIHandler.destroyCardPreview()
                     scene.UIHandler.challenged(player, challenger)
                     scene.CardHandler.stackHand(challenger)
 
-                    playerDice = scene.UIHandler.buildDice(cardPlayed.x, cardPlayed.y + 300)
-                    challengerDice = scene.UIHandler.buildDice(challengeCard.x, challengeCard.y + 300)
+                    playerDice = scene.UIHandler.DiceHandler.buildDice(cardPlayed.x, cardPlayed.y + 300)
+                    challengerDice = scene.UIHandler.DiceHandler.buildDice(challengeCard.x, challengeCard.y + 300)
 
-                    scene.UIHandler.rollDice(
+                    playerResult = players[player].lastRoll.result1+players[player].lastRoll.result2
+                    challengerResult = players[challenger].lastRoll.result1+players[challenger].lastRoll.result2
+
+                    scene.UIHandler.DiceHandler.rollDice(
                         playerDice, 
                         players[player].lastRoll.result1,
                         players[player].lastRoll.result2
                         )
-                    .then(() => {scene.UIHandler.rollDice(
+                    .then(() => {scene.UIHandler.DiceHandler.rollDice(
                         challengerDice, 
                         players[challenger].lastRoll.result1,
                         players[challenger].lastRoll.result2
@@ -152,8 +157,20 @@ export default class SocketHandler {
                     .then(() => resolve())
                     })
                 }))
+                // Check for Fist of Reason
+                .then(() => new Promise(resolve => {
+                    let leaderCard = scene.UIHandler.areas[challenger].leaderArea.getData('card')
+                    if (leaderCard.getData('name') === 'theFistOfReason') {
+                        scene.CardHandler.modifyRoll(challengerDice, leaderCard, 2)
+                        .then(result => {
+                            challengerResult = result
+                            resolve()
+                        })
+                    } else resolve()
+                }))
+                // Resolve Challenge
                 .then(() => {
-                    if (players[player].lastRoll.result1+players[player].lastRoll.result2 >= players[challenger].lastRoll.result1+players[challenger].lastRoll.result2) {
+                    if (playerResult >= challengerResult) {
                         scene.discardArea.data.list.cards.push(challengeCard)
                         scene.CardHandler.moveToDiscard(challengeCard)
                         .then(() => {
@@ -225,9 +242,9 @@ export default class SocketHandler {
 
             scene.UIHandler.buildAttackView(monsterCard, player)
             .then(() => new Promise(resolve => {
-                let dice = scene.UIHandler.buildDice(scene.scale.width/2, scene.scale.height/2)
+                let dice = scene.UIHandler.DiceHandler.buildDice(scene.scale.width/2, scene.scale.height/2)
                 
-                scene.UIHandler.rollDice(
+                scene.UIHandler.DiceHandler.rollDice(
                     dice, 
                     scene.GameHandler.players[player].lastRoll.result1,
                     scene.GameHandler.players[player].lastRoll.result2
@@ -238,7 +255,7 @@ export default class SocketHandler {
                 let result = monsterCard.checkSlay(scene.GameHandler.players[player].lastRoll.result1 + scene.GameHandler.players[player].lastRoll.result2)
                 
                 scene.UIHandler.destroyAttackView()
-                scene.UIHandler.destroyDice()
+                scene.UIHandler.DiceHandler.destroyDice()
                 scene.CardHandler.moveToLeaderArea(scene.UIHandler.areas[player].leaderArea.getData('card'))
                 
                 if (result === 'success') {
