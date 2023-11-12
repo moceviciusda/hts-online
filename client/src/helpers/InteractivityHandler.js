@@ -20,7 +20,6 @@ export default class InteractivityHandler {
             scene.drawCard.on('pointerout', () => scene.drawCard.setColor('#00ffff'))
             scene.drawCard.on('pointerup', () => {
                 if (scene.GameHandler.currentTurn === scene.socket.id) {
-                    // scene.drawCard.disableInteractive()
                     scene.socket.emit('drawCard', scene.socket.id)
                 }
             })

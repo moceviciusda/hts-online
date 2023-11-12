@@ -157,7 +157,7 @@ export default class SocketHandler {
                     .then(() => resolve())
                     })
                 }))
-                // Check for Fist of Reason
+                // Check for The Fist of Reason
                 .then(() => new Promise(resolve => {
                     let leaderCard = scene.UIHandler.areas[challenger].leaderArea.getData('card')
                     if (leaderCard.getData('name') === 'theFistOfReason') {
@@ -167,6 +167,44 @@ export default class SocketHandler {
                             resolve()
                         })
                     } else resolve()
+                }))
+                // Check for Titan Wyvern
+                .then(() => new Promise(resolve => {
+                    let titanWyvern = scene.UIHandler.areas[player].slayArea.getData('monsters').concat(scene.UIHandler.areas[challenger].slayArea.getData('monsters'))
+                    .find(monsterCard => monsterCard.getData('name') === 'titanWyvern')
+                    if (titanWyvern) {
+                        let ownerDice
+                        titanWyvern.getData('owner') === player ? ownerDice = playerDice : ownerDice = challengerDice
+                        scene.CardHandler.modifyRoll(ownerDice, titanWyvern, 1)
+                        .then(result => {
+                            titanWyvern.getData('owner') === player ? playerResult = result : challengerResult = result
+                            resolve()
+                        })
+                    } else resolve()
+                }))
+                // Apply player turn modifiers
+                .then(() => new Promise(resolve => {
+                    scene.GameHandler.players[player].modifiers.reduce(
+                        (promise, modifier) => promise.then(() => {
+                            // this.move(unit)
+                            console.log(modifier)
+                            scene.CardHandler.modifyRoll(playerDice, modifier.card, modifier.value)
+                            .then(result => playerResult = result)
+                        }),
+                        Promise.resolve()
+                    ).then(() => resolve())
+                }))
+                // Apply challenger turn modifiers
+                .then(() => new Promise(resolve => {
+                    scene.GameHandler.players[challenger].modifiers.reduce(
+                        (promise, modifier) => promise.then(() => {
+                            // this.move(unit)
+                            console.log(modifier)
+                            scene.CardHandler.modifyRoll(challengerDice, modifier.card, modifier.value)
+                            .then(result => challengerResult = result)
+                        }),
+                        Promise.resolve()
+                    ).then(() => resolve())
                 }))
                 // Resolve Challenge
                 .then(() => {
@@ -227,9 +265,14 @@ export default class SocketHandler {
             let handArea = scene.UIHandler.areas[player].handArea
             let magic = handArea.cards.find(card => card.getData('name') === name && card.getData('playing'))
             
+            // Check for The Cloaked Sage
+            if (scene.UIHandler.areas[player].leaderArea.getData('card').getData('name') === 'theCloakedSage' && scene.socket.id === player) {
+                scene.socket.emit('drawCard', player)
+            }
+            
             handArea.cards.splice(handArea.cards.indexOf(magic), 1)
-            magic.setData('playing', false)
             magic.effect(player)
+            magic.setData('playing', false)
             scene.discardArea.data.list.cards.push(magic)
             scene.CardHandler.moveToDiscard(magic)
             .then(() => scene.CardHandler.stackHand(player))
@@ -239,10 +282,12 @@ export default class SocketHandler {
         scene.socket.on('attacking', (monsterName, player) => {
             let monsterCard = scene.monsterArea.getData('cards').find(card => card.getData('name') === monsterName)
             monsterCard.preFX.clear()
+            let dice
+            let rollResult = scene.GameHandler.players[player].lastRoll.result1 + scene.GameHandler.players[player].lastRoll.result2
 
             scene.UIHandler.buildAttackView(monsterCard, player)
             .then(() => new Promise(resolve => {
-                let dice = scene.UIHandler.DiceHandler.buildDice(scene.scale.width/2, scene.scale.height/2)
+                dice = scene.UIHandler.DiceHandler.buildDice(scene.scale.width/2, scene.scale.height/2)
                 
                 scene.UIHandler.DiceHandler.rollDice(
                     dice, 
@@ -251,9 +296,22 @@ export default class SocketHandler {
                     )
                 .then(() => resolve())
             }))
+            // Check for The Divine Arrow
+            .then(() => new Promise(resolve => {
+                let leaderCard = scene.UIHandler.areas[player].leaderArea.getData('card')
+                if (leaderCard.getData('name') === 'theDivineArrow') {
+                    scene.CardHandler.modifyRoll(dice, leaderCard, 1)
+                    .then(result => {
+                        rollResult = result
+                        resolve()
+                    })
+                } else resolve()
+            }))
+            // Resolve Attack
             .then(() => {
-                let result = monsterCard.checkSlay(scene.GameHandler.players[player].lastRoll.result1 + scene.GameHandler.players[player].lastRoll.result2)
-                
+                let result = monsterCard.checkSlay(rollResult)
+                // scene.children.bringToTop(leaderCard)
+
                 scene.UIHandler.destroyAttackView()
                 scene.UIHandler.DiceHandler.destroyDice()
                 scene.CardHandler.moveToLeaderArea(scene.UIHandler.areas[player].leaderArea.getData('card'))

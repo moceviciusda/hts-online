@@ -491,7 +491,7 @@ export default class CardHandler {
                             card.x = initialX
                             card.y = initialY
                             card.setAngle(initialAngle).setScale(initialScale)
-                            scene.children.sendToBack(card)
+                            if (scene.GameHandler.gameState !== 'attacking') scene.children.sendToBack(card)
 
                             scene.UIHandler.DiceHandler.changeValue(dice, value)
                             .then(value => resolve(value))
