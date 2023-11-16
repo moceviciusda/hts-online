@@ -180,6 +180,17 @@ export default class DiceHandler {
             })
         })
 
+
+        this.applyTurnModifiers = (player, dice) => new Promise(resolve => {
+            scene.GameHandler.players[player].modifiers.reduce(
+                (promise, modifier) => promise.then(() => new Promise(resolve => {
+                    scene.CardHandler.modifyRoll(dice, modifier.card, modifier.value)
+                    .then(() => resolve())
+                })),
+                Promise.resolve()
+            )
+            .then(() => resolve(dice.valueText.text))
+        })
         
     }
 }

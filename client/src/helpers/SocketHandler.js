@@ -183,38 +183,21 @@ export default class SocketHandler {
                     } else resolve()
                 }))
                 // Apply player turn modifiers
-                .then(() => new Promise(resolve => {
-                    scene.GameHandler.players[player].modifiers.reduce(
-                        (promise, modifier) => promise.then(() => {
-                            // this.move(unit)
-                            console.log(modifier)
-                            scene.CardHandler.modifyRoll(playerDice, modifier.card, modifier.value)
-                            .then(result => playerResult = result)
-                        }),
-                        Promise.resolve()
-                    ).then(() => resolve())
-                }))
-                // Apply challenger turn modifiers
-                .then(() => new Promise(resolve => {
-                    scene.GameHandler.players[challenger].modifiers.reduce(
-                        (promise, modifier) => promise.then(() => {
-                            // this.move(unit)
-                            console.log(modifier)
-                            scene.CardHandler.modifyRoll(challengerDice, modifier.card, modifier.value)
-                            .then(result => challengerResult = result)
-                        }),
-                        Promise.resolve()
-                    ).then(() => resolve())
-                }))
+                .then(() => scene.UIHandler.DiceHandler.applyTurnModifiers(player, playerDice))
+                // // Apply challenger turn modifiers
+                // .then(() => scene.UIHandler.DiceHandler.applyTurnModifiers(challenger, challengerDice))
                 // Resolve Challenge
                 .then(() => {
-                    if (playerResult >= challengerResult) {
+                    console.log('RESOLVING', parseInt(playerDice.valueText.text), parseInt(challengerDice.valueText.text))
+                    if (parseInt(playerDice.valueText.text) >= parseInt(challengerDice.valueText.text)) {
+                        console.log('challengeFailed')
                         scene.discardArea.data.list.cards.push(challengeCard)
                         scene.CardHandler.moveToDiscard(challengeCard)
                         .then(() => {
                             if (player === scene.socket.id) scene.socket.emit('challengeFailed')
                         })
                     } else {
+                        console.log('challengeSuccessfull')
                         scene.UIHandler.destroyChallengeView()
                         cardPlayed.setData('playing', false)
                         challengeCard.setData('playing', false)

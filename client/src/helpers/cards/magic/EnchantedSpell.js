@@ -10,7 +10,7 @@ export default class EnchantedSpell extends Card {
 
         this.effect = player => {
             scene.GameHandler.players[player].modifiers.push({
-                card: scene.children.list.find(card => card.getData('name') === this.name),
+                card: scene.children.list.find(card => card.getData('name') === this.name && card.getData('playing')),
                 value: 2
             })
         }
