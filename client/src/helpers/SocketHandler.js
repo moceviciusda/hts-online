@@ -116,7 +116,6 @@ export default class SocketHandler {
             })
 
             scene.socket.once('challenged', (challengeName, challenger) => {
-                let playerResult, challengerResult
                 let players = scene.GameHandler.players
                 let challengerHandArea = scene.UIHandler.areas[challenger].handArea
                 let challengeCard, challengerDice, playerDice
@@ -141,9 +140,6 @@ export default class SocketHandler {
                     playerDice = scene.UIHandler.DiceHandler.buildDice(cardPlayed.x, cardPlayed.y + 300)
                     challengerDice = scene.UIHandler.DiceHandler.buildDice(challengeCard.x, challengeCard.y + 300)
 
-                    playerResult = players[player].lastRoll.result1+players[player].lastRoll.result2
-                    challengerResult = players[challenger].lastRoll.result1+players[challenger].lastRoll.result2
-
                     scene.UIHandler.DiceHandler.rollDice(
                         playerDice, 
                         players[player].lastRoll.result1,
@@ -162,10 +158,7 @@ export default class SocketHandler {
                     let leaderCard = scene.UIHandler.areas[challenger].leaderArea.getData('card')
                     if (leaderCard.getData('name') === 'theFistOfReason') {
                         scene.CardHandler.modifyRoll(challengerDice, leaderCard, 2)
-                        .then(result => {
-                            challengerResult = result
-                            resolve()
-                        })
+                        .then(() => resolve())
                     } else resolve()
                 }))
                 // Check for Titan Wyvern
@@ -176,10 +169,7 @@ export default class SocketHandler {
                         let ownerDice
                         titanWyvern.getData('owner') === player ? ownerDice = playerDice : ownerDice = challengerDice
                         scene.CardHandler.modifyRoll(ownerDice, titanWyvern, 1)
-                        .then(result => {
-                            titanWyvern.getData('owner') === player ? playerResult = result : challengerResult = result
-                            resolve()
-                        })
+                        .then(() => resolve())
                     } else resolve()
                 }))
                 // Apply player turn modifiers
@@ -284,15 +274,14 @@ export default class SocketHandler {
                 let leaderCard = scene.UIHandler.areas[player].leaderArea.getData('card')
                 if (leaderCard.getData('name') === 'theDivineArrow') {
                     scene.CardHandler.modifyRoll(dice, leaderCard, 1)
-                    .then(result => {
-                        rollResult = result
-                        resolve()
-                    })
+                    .then(result => resolve())
                 } else resolve()
             }))
+            // Apply player turn modifiers
+            .then(() => scene.UIHandler.DiceHandler.applyTurnModifiers(player, dice))
             // Resolve Attack
             .then(() => {
-                let result = monsterCard.checkSlay(rollResult)
+                let result = monsterCard.checkSlay(parseInt(dice.valueText.text))
                 // scene.children.bringToTop(leaderCard)
 
                 scene.UIHandler.destroyAttackView()
