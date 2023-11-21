@@ -54,8 +54,8 @@ export default class SocketHandler {
                         leader.destroy()
                     }
                 });
-                scene.discardPile = scene.DeckHandler.dealCard(scene.deckArea.x, scene.deckArea.y, 'cardBack', null).setAngle(-90).setInteractive()
-                scene.discardPile.on('pointerup', () => scene.UIHandler.buildCardSelectionView(scene.discardArea.getData('cards')))
+                scene.deck = scene.DeckHandler.dealCard(scene.deckArea.x, scene.deckArea.y, 'cardBack', null).setAngle(-90).setInteractive()
+                // scene.discardPile.on('pointerup', () => scene.UIHandler.buildCardSelectionView(scene.discardArea.getData('cards')))
                 scene.DeckHandler.dealCard(scene.monsterArea.x+344-85, scene.monsterArea.y, 'monsterCardBack', null)
                 scene.UIHandler.buildGameText()
             }
@@ -102,7 +102,6 @@ export default class SocketHandler {
             } else {
                 cardPlayed = handArea.cards.find(card => card.getData('name') === name).setData('playing', true)
             }
-            scene.UIHandler.buildChallengeView(cardPlayed, player)
 
             scene.socket.once('notChallenged', () => {
                 scene.UIHandler.destroyChallengeView()
@@ -172,10 +171,19 @@ export default class SocketHandler {
                         .then(() => resolve())
                     } else resolve()
                 }))
+                // Check for Anuran Cauldron
+                .then(() => new Promise(resolve => {
+                    let anuranCauldron = scene.UIHandler.areas[player].slayArea.getData('monsters').concat(scene.UIHandler.areas[challenger].slayArea.getData('monsters'))
+                    .find(monsterCard => monsterCard.getData('name') === 'anuranCauldron')
+                    if (anuranCauldron) {
+                        let ownerDice
+                        anuranCauldron.getData('owner') === player ? ownerDice = playerDice : ownerDice = challengerDice
+                        scene.CardHandler.modifyRoll(ownerDice, anuranCauldron, 1)
+                        .then(() => resolve())
+                    } else resolve()
+                }))
                 // Apply player turn modifiers
                 .then(() => scene.UIHandler.DiceHandler.applyTurnModifiers(player, playerDice))
-                // // Apply challenger turn modifiers
-                // .then(() => scene.UIHandler.DiceHandler.applyTurnModifiers(challenger, challengerDice))
                 // Resolve Challenge
                 .then(() => {
                     console.log('RESOLVING', parseInt(playerDice.valueText.text), parseInt(challengerDice.valueText.text))
@@ -206,6 +214,9 @@ export default class SocketHandler {
                 })   
 
             })
+
+            scene.UIHandler.buildChallengeView(cardPlayed, player)
+            
         })
 
         scene.socket.on('heroSummoned', (name, player) => {
@@ -274,7 +285,16 @@ export default class SocketHandler {
                 let leaderCard = scene.UIHandler.areas[player].leaderArea.getData('card')
                 if (leaderCard.getData('name') === 'theDivineArrow') {
                     scene.CardHandler.modifyRoll(dice, leaderCard, 1)
-                    .then(result => resolve())
+                    .then(() => resolve())
+                } else resolve()
+            }))
+            // Check for Anuran Cauldron
+            .then(() => new Promise(resolve => {
+                let anuranCauldron = scene.UIHandler.areas[player].slayArea.getData('monsters')
+                .find(monsterCard => monsterCard.getData('name') === 'anuranCauldron')
+                if (anuranCauldron) {
+                    scene.CardHandler.modifyRoll(dice, anuranCauldron, 1)
+                    .then(() => resolve())
                 } else resolve()
             }))
             // Apply player turn modifiers
@@ -315,8 +335,53 @@ export default class SocketHandler {
 
         scene.socket.on('heroSacrificed', (heroName, player) => {
             let hero = scene.UIHandler.areas[player].heroArea.data.list.heroes.find(card => card.getData('name') === heroName)
-            hero.setData('selected', false)
-            scene.CardHandler.sacrificeHero(hero)
+            let corruptedSabretooth = scene.UIHandler.areas[scene.GameHandler.currentTurn].slayArea.getData('monsters').find(monster => monster.getData('name') === 'corruptedSabretooth')
+            let dracos = scene.UIHandler.areas[player].slayArea.getData('monsters').find(monster => monster.getData('name') === 'dracos')
+            let terratuga = scene.UIHandler.areas[player].slayArea.getData('monsters').find(monster => monster.getData('name') === 'terratuga')
+            
+            // If Destroy
+            if (scene.GameHandler.currentTurn !== player) {
+                // If Destroy target has slain Terratuga
+                if (terratuga) {
+                    scene.children.bringToTop(terratuga)
+                    scene.CardHandler.highlight(terratuga)
+                    .then(() => {
+                        terratuga.preFX.clear()
+                        scene.children.sendToBack(terratuga)
+                        hero.setData('selected', false)
+                    })
+                } else {
+                    // if Destroyer has slain Corrupted Sabretooth
+                    if (corruptedSabretooth) {
+                        scene.children.bringToTop(corruptedSabretooth)
+                        scene.CardHandler.highlight(corruptedSabretooth)
+                        .then(() => {
+                            corruptedSabretooth.preFX.clear()
+                            scene.children.sendToBack(corruptedSabretooth)
+                            if (scene.socket.id === player) scene.socket.emit('heroStolen', heroName, player, scene.GameHandler.currentTurn)
+                        })
+                    } else {
+                        hero.setData('selected', false)
+                        scene.CardHandler.sacrificeHero(hero)
+                        .then(() => {
+                            // If Destroy target has slain Dracos
+                            if (dracos) {
+                                scene.children.bringToTop(dracos)
+                                scene.CardHandler.highlight(dracos)
+                                .then(() => {
+                                    dracos.preFX.clear()
+                                    scene.children.sendToBack(dracos)
+                                    if (scene.socket.id === player) scene.socket.emit('drawCard', player)
+                                })
+                            }
+                        })
+                    }
+                }
+            // If Sacrifice
+            } else { 
+                hero.setData('selected', false)
+                scene.CardHandler.sacrificeHero(hero)
+            }
         })
         
         scene.socket.on('heroStolen', (heroName, heroOwner, player) => {

@@ -23,6 +23,19 @@ export default class InteractivityHandler {
                     scene.socket.emit('drawCard', scene.socket.id)
                 }
             })
+
+            scene.resetHand.on('pointerover', () => scene.resetHand.setColor('#ff69b4'))
+            scene.resetHand.on('pointerout', () => scene.resetHand.setColor('#00ffff'))
+            scene.resetHand.on('pointerup', () => {
+                if (scene.GameHandler.currentTurn === scene.socket.id) {
+                    scene.UIHandler.areas[scene.socket.id].handArea.cards.forEach(card => {
+                        card.setData('selected', true)
+                        scene.socket.emit('discard', card.getData('name'), scene.socket.id)
+                    })
+                    
+                    for (let i = 0; i < 5; i++) scene.socket.emit('drawCard', scene.socket.id)
+                }
+            })
         }
 
         this.challengeInteractivity = () => {

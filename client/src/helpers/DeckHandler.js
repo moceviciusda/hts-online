@@ -222,6 +222,5 @@ export default class DeckHandler {
             scene.CardHandler.stackMonsters()
         }        
         
-        // this.discard = ()
     }
 }

@@ -243,6 +243,7 @@ export default class CardHandler {
                         location: 'discard',
                         owner: null
                     })
+                    scene.input.setDraggable(card, false)
                     resolve()
                     tween.remove()
                 }

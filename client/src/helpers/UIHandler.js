@@ -85,8 +85,8 @@ export default class UIHandler {
             scene.drawCard = scene.add.text(1420, 1000, 'Draw')
             scene.drawCard.setFontSize(32).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5).setInteractive()
 
-            scene.rollDice = scene.add.text(1420, 1050, 'Roll Dice')
-            scene.rollDice.setFontSize(32).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5).setInteractive()
+            scene.resetHand = scene.add.text(1420, 1050, 'Reset Hand')
+            scene.resetHand.setFontSize(32).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5).setInteractive()
 
             scene.InteractivityHandler.gameTextInteractivity()
         }
@@ -160,6 +160,7 @@ export default class UIHandler {
         }
 
         this.buildChallengeView = (playedCard, player) => {
+            let warwornOwlbear = scene.UIHandler.areas[player].slayArea.getData('monsters').find(monster => monster.getData('name') === 'warwornOwlbear')
             scene.fadeBackground.setVisible(true)
             scene.children.bringToTop(scene.fadeBackground)
             scene.children.bringToTop(playedCard)
@@ -181,7 +182,16 @@ export default class UIHandler {
             .setFontSize(48).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5)
             scene.dontChallengeText = scene.add.text(scene.scale.width/2, 860, '')
             .setFontSize(48).setFontFamily('Trebuchet MS').setColor('#00ffff').setOrigin(0.5, 0.5).setScale(0)
-            if (player !== scene.socket.id && scene.UIHandler.areas[scene.socket.id].handArea.cards.find((card) => card.getData('type') === 'challenge')) {
+            
+            if (warwornOwlbear && playedCard.getData('type') === 'item') {
+                scene.children.bringToTop(warwornOwlbear)
+                scene.CardHandler.highlight(warwornOwlbear)
+                .then(() => {
+                    warwornOwlbear.preFX.clear()
+                    scene.children.sendToBack(warwornOwlbear)
+                    scene.time.delayedCall(1000, () => scene.socket.emit('dontChallenge'))
+                })
+            } else if (player !== scene.socket.id && scene.UIHandler.areas[scene.socket.id].handArea.cards.find((card) => card.getData('type') === 'challenge')) {
                 scene.challengeText.setText(`${player} is Playing ${playedCard.getData('name')}`)
                 scene.dontChallengeText.setText("Don't Challenge").setScale(1).setInteractive()
                 scene.InteractivityHandler.challengeInteractivity()
