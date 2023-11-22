@@ -117,6 +117,12 @@ export default class Game extends Phaser.Scene {
         this.load.image('forcedExchange', 'src/assets/magic/Forced_Exchange.png')
         this.load.image('forcefulWinds', 'src/assets/magic/Forceful_Winds.png')
         this.load.image('windsOfChange', 'src/assets/magic/Winds_of_Change.png')
+
+        this.load.image('minus4', 'src/assets/modifiers/Minus4.png')
+        this.load.image('plus1Minus3', 'src/assets/modifiers/Plus1_Minus3.png')
+        this.load.image('plus2Minus2', 'src/assets/modifiers/Plus2_Minus2.png')
+        this.load.image('plus3Minus1', 'src/assets/modifiers/Plus3_Minus1.png')
+        this.load.image('plus4', 'src/assets/modifiers/Plus4.png')
     }
 
     create() {

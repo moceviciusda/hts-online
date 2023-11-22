@@ -97,6 +97,12 @@ import ForcedExchange from "./cards/magic/ForcedExchange"
 import ForcefulWinds from "./cards/magic/ForcefulWinds"
 import WindsOfChange from "./cards/magic/WindsOfChange"
 
+import Minus4 from "./cards/modifiers/Minus4"
+import Plus1Minus3 from "./cards/modifiers/Plus1Minus3"
+import Plus2Minus2 from "./cards/modifiers/Plus2Minus2"
+import Plus3Minus1 from "./cards/modifiers/Plus3Minus1"
+import Plus4 from "./cards/modifiers/Plus4"
+
 
 export default class DeckHandler {
     constructor(scene){
@@ -200,7 +206,13 @@ export default class DeckHandler {
                 entanglingTrap: new EntanglingTrap(scene),
                 forcedExchange: new ForcedExchange(scene),
                 forcefulWinds: new ForcefulWinds(scene),
-                windsOfChange: new WindsOfChange(scene)
+                windsOfChange: new WindsOfChange(scene),
+
+                minus4: new Minus4(scene),
+                plus1Minus3: new Plus1Minus3(scene),
+                plus2Minus2: new Plus2Minus2(scene),
+                plus3Minus1: new Plus3Minus1(scene),
+                plus4: new Plus4(scene)
             }
             let newCard = cards[name]
 

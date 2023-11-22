@@ -1,7 +1,7 @@
 const server = require('express')()
 const http = require('http').createServer(server)
-const cors = require('cors')
-const { constants } = require('os')
+// const cors = require('cors')
+// const { constants } = require('os')
 const io = require('socket.io')(http, {
     cors: {
         origin: 'http://localhost:8080',
@@ -21,7 +21,7 @@ let monsters = []
 let baseHeroes = ['badAxe', 'bearClaw', 'bearyWise', 'furyKnuckle', 'heavyBear', 'panChucks', 'qiBear', 'toughTeddy', 'dodgyDealer', 'fuzzyCheeks', 'greedyCheeks', 'luckyBucky', 'mellowDee', 'nappingNibbles', 'peanut', 'tipsyTootie', 'calmingVoice', 'guidingLight', 'holyCurselifter', 'ironResolve', 'mightyBlade', 'radiantHorn', 'vibrantGlow', 'wiseShield', 'bullseye', 'hook', 'lookieRookie', 'quickDraw', 'seriousGrey', 'sharpFox', 'wildshot', 'wilyRed', 'kitNapper', 'meowzio', 'plunderingPuma', 'shurikitty', 'silentShadow', 'slipperyPaws', 'slyPickings', 'smoothMimimeow', 'bunBun', 'buttons', 'fluffy', 'hopper', 'snowball', 'spooky', 'whiskers', 'wiggles']
 let baseItems = ['bardMask', 'decoyDoll', 'fighterMask', 'guardianMask', 'particularlyRustyCoin', 'particularlyRustyCoin', 'rangerMask', 'reallyBigRing', 'reallyBigRing', 'thiefMask', 'wizardMask', 'curseOfTheSnakesEyes', 'curseOfTheSnakesEyes', 'sealingKey', 'suspiciouslyShinyCoin']
 let baseChallenges = ['challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge']
-let baseMagic = ['callToTheFallen', 'criticalBoost', 'criticalBoost', 'destructiveSpell', 'destructiveSpell', 'enchantedSpell', 'enchantedSpell', 'entanglingTrap', 'entanglingTrap', 'forcedExchange', 'forcefulWinds', 'windsOfChange', 'windsOfChange', 'destructiveSpell', 'destructiveSpell', 'destructiveSpell', 'destructiveSpell', 'destructiveSpell', 'destructiveSpell', 'destructiveSpell', 'destructiveSpell', 'destructiveSpell', 'destructiveSpell']
+let baseMagic = ['callToTheFallen', 'criticalBoost', 'criticalBoost', 'destructiveSpell', 'destructiveSpell', 'enchantedSpell', 'enchantedSpell', 'entanglingTrap', 'entanglingTrap', 'forcedExchange', 'forcefulWinds', 'windsOfChange', 'windsOfChange']
 let deck = [].concat(baseHeroes, baseItems, baseChallenges, baseMagic)
 // deck = ['challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge', 'challenge']
 let discard = []
